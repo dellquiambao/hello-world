@@ -1,0 +1,8578 @@
+﻿version "8.1"
+file version 0, 22
+comment {
+	*** NOTES ON SCRIPT UPGRADE:
+	
+	1. script 'phones' record section: dropped. Suggestion: replace references to the old phones below, by the new built-in contact profile record attributes homePhone, businessPhone, etc.
+	phones record {
+	phone1
+	phone2
+	mobile1
+	mobile2
+	callback
+	}
+}
+size 935, 640
+flow view {
+}
+
+modules {}
+
+dependencies {}
+
+constants {
+	cte_calend_chr:= "."
+}
+
+types {
+	multiscript_outcomes: enumeration defined in BusinessDataType::outcomes {
+		Sale {
+			label "Sale"
+			value 1000
+		}
+		No_Sale {
+			label "No Sale"
+			value 2000
+		}
+		No_Answer {
+			label "No Answer"
+			value 3000
+		}
+		Reject {
+			label "Reject"
+			value 4000
+		}
+		Ans_Machine {
+			label "Answering Machine"
+			value 2
+		}
+		Callback {
+			label "Callback"
+			value 1
+		}
+	}
+		comment {UPGRADE WARNING: types set: 'CallTypeValues' type created to support the upgrade of 'set call type' action to 'add to outcomes'}
+}
+
+variables {
+	v_calend_month: number
+		comment {v_calend_mes: number}
+	v_calend_day: number
+		comment {v_calend_dia: number}
+	v_calend_year: number
+		comment {v_calend_año: number}
+	v_calend_day_week: text
+		comment {v_calend_dia_semana: text}
+	v_calend_first_day: number
+		comment {v_calend_primer_dia: number}
+	v_calend_last_day_month: number
+		comment {v_calend_ultimo_dia_mes: number}
+	v_calend_tabla_days: array [37] of text(2)
+		comment {v_calend_tabla_dias: array [37] of text(2)}
+	v_calend_tabla_days_status: array [37] of boolean
+		comment {v_calend_tabla_dias_status: array [37] of boolean}
+	v_calend_name_month: text
+		comment {v_calend_nombre_mes: text}
+	v_calend_day_test: text
+		comment {v_calend_dia_test: text}
+	v_calend_date_cto: date
+		comment {v_calend_fecha_cto: date}
+	v_calend_hour_cto: time
+		comment {v_calend_hora_cto: time}
+	v_calend_date_complete: text
+		comment {v_calend_fecha_completa: text}
+	v_calend_date_from: date
+		comment {v_calend_fecha_desde: date}
+	v_calend_date_to: date
+		comment {v_calend_fecha_hasta: date}
+	v_calend_fiesta: boolean
+		comment {v_calend_fiesta: boolean}
+	v_calend_text_from: text
+		comment {v_calend_texto_desde: text}
+	v_calend_text_to: text
+		comment {v_calend_texto_hasta: text}
+	v_date_cto: date
+		comment {v_fecha_cto: date}
+	v_date_complete: text
+		comment {v_fecha_completa: text}
+	v_date_from: date
+		comment {v_fecha_desde: date}
+	v_date_to: date
+		comment {v_fecha_hasta: date}
+	v_date: date
+		comment {v_fecha: date}
+	v_hour: time
+		comment {v_hora: time}
+	v_agent: text(20)
+		comment {v_agente: text(20)}
+	v_rule_marked: text
+		comment {v_regla_marcado: text}
+	vg_message: text
+		comment {vg_mensaje: text}
+	vg_caption: text
+		comment {vg_caption: text}
+	v_leapyear: number(1)
+		comment {v_bisiesto: number(1)}
+	v_time: time
+		comment {v_time: time}
+	v_rest_time: number
+		comment {v_resta_time: number}
+	v_search_name: text
+	v_search_surname: text
+	v_search_address: text
+	v_search_phone: text
+	v_min_outcome: number(8)
+	v_max_outcome: number(8)
+	v_cttable: text
+	v_alreadyLoaded: boolean
+	v_sale: boolean
+	b_redial: text
+	b_record_call: text
+	b_search_contact: text
+	b_back: text
+	b_set_callback: text
+	b_callback: text
+	b_no_contact: text
+	b_data_input: text
+	b_sale: text
+	b_no_sale: text
+	b_more_data: text
+	b_end: text
+	b_clear: text
+	b_search: text
+	v_custom2_screen: boolean
+	v_custom3_screen: boolean
+	b_close: text
+	b_refuse: text
+	b_load: text
+	b_phone: text
+	b_priority: text
+	b_low: text
+	b_med: text
+	b_high: text
+	b_from: text
+	b_to: text
+	b_day: text
+	b_time: text
+	b_afternoon: text
+	b_evening: text
+	b_night: text
+	b_myself: text
+	b_other: text
+	b_transfer: text
+	b_transfer_ag: text
+	v_readyToTransfer: boolean
+	v_search_condition: text
+	v_transfering: boolean
+	b_am: text
+	b_welcome: text
+	b_outcome: text
+	b_search_customer: text
+	b_select_customer: text
+	b_desired_customer: text
+	gn_id_win1: number
+	gn_id_win2: number
+	gn_id_win3: number
+	gv_phone: text
+	g_bln_recording: boolean
+	g_bln_errorRecording: boolean
+	g_voiceFileName: text
+	v_doRecording: boolean
+	v_doTransfer: boolean
+	b_comments: text
+	v_search_easycode: text
+	gv_contact_date: datetime
+	gv_agent: text(80)
+	gv_dnis: text(30)
+	gv_outcome_label: text
+	gv_outcome_desc: text(100)
+	gv_outcome_enum: number
+	gv_outcome: OutcomeRecord
+}
+
+parameters {}
+
+campaign record {
+	cp_phone1: text(30)
+	cp_phone2: text(30)
+	cp_mobile1: text(30)
+	cp_mobile2: text(30)
+	cp_transfer: text(30)
+	cp_search: boolean
+	cp_arg1: text(25)
+	cp_arg2: text(25)
+	cp_arg3: text(25)
+	cp_arg1_url: text(100)
+	cp_arg2_url: text(100)
+	cp_arg3_url: text(100)
+	cp_cons_campaign: text(30)
+	cp_dial_rule: text(20)
+	cp_time_start: time
+	cp_code_am: number(8)
+	cp_company: text(50)
+	cp_termination_key: text(5)
+	cp_recording_ext: text(20)
+	cp_time_end: time
+	cp_no_sale_min: number(8,0)
+	cp_no_sale_max: number(8,0)
+	cp_sale_min: number(8,0)
+	cp_sale_max: number(8,0)
+	cp_no_contact_min: number(8,0)
+	cp_no_contact_max: number(8,0)
+	cp_max_reschedule: number(8)
+	cp_hour_reschedule: number(8)
+	cp_language: text(2)
+	cp_code_callback: number(8)
+	cp_calend_days: number(3,0)
+	cp_calend_to: date
+	cp_prefix: text(10)
+	cp_phone_length: number(2,0)
+	cp_editable_fields: boolean
+	cp_name: text(30)
+	cp_surname: text(30)
+	cp_address: text(30)
+	cp_cust1_text01: text(30)
+	cp_cust1_text02: text(30)
+	cp_cust1_text03: text(30)
+	cp_cust1_text04: text(30)
+	cp_cust1_text05: text(30)
+	cp_cust1_text06: text(30)
+	cp_cust1_text07: text(30)
+	cp_cust1_text08: text(30)
+	cp_cust1_text09: text(30)
+	cp_cust1_text10: text(30)
+	cp_cust1_text11: text(30)
+	cp_cust1_text12: text(30)
+	cp_cust1_text13: text(30)
+	cp_cust2_text01: text(30)
+	cp_cust2_text02: text(30)
+	cp_cust2_text03: text(30)
+	cp_cust2_text04: text(30)
+	cp_cust2_text05: text(30)
+	cp_cust2_text06: text(30)
+	cp_cust2_text07: text(30)
+	cp_cust2_text08: text(30)
+	cp_cust2_text09: text(30)
+	cp_cust2_text10: text(30)
+	cp_cust2_text11: text(30)
+	cp_cust2_text12: text(30)
+	cp_cust2_text13: text(30)
+	cp_cust2_text14: text(30)
+	cp_cust2_text15: text(30)
+	cp_cust2_text16: text(30)
+	cp_cust2_text17: text(30)
+	cp_cust2_text18: text(30)
+	cp_cust2_text19: text(30)
+	cp_cust2_text20: text(30)
+	cp_cust3_text01: text(30)
+	cp_cust3_text02: text(30)
+	cp_cust3_text03: text(30)
+	cp_cust3_text04: text(30)
+	cp_cust3_text05: text(30)
+	cp_cust3_text06: text(30)
+	cp_cust3_text07: text(30)
+	cp_cust3_text08: text(30)
+	cp_cust3_text09: text(30)
+	cp_cust3_text10: text(30)
+	cp_cust3_text11: text(30)
+	cp_cust3_text12: text(30)
+	cp_cust3_text13: text(30)
+	cp_cust3_text14: text(30)
+	cp_cust3_text15: text(30)
+	cp_cust3_text16: text(30)
+	cp_cust3_text17: text(30)
+	cp_cust3_text18: text(30)
+	cp_cust3_text19: text(30)
+	cp_cust3_text20: text(30)
+	cp_email_address1: text(50)
+	cp_email_address2: text(50)
+}
+
+contact record {
+	ct_agent: text(80)
+	ct_contact_date: datetime
+	ct_call_type: number(18)
+	ct_call_type_name: text(32)
+	ct_call_type_desc: text(255)
+	ct_call_type_id: number(4)
+	ct_batch_name: text(20)
+	ct_load_date: datetime
+	ct_email_ID: number(8)
+	ct_expiry_date: datetime
+	ct_num_calls: number(3)
+	ct_num_recalls: number(3)
+	ct_duration: number(5)
+	ct_dnis: text(30)
+	ct_call_id: number(18)
+	ct_talk_time: number(5)
+	ct_comments: text(250)
+	ct_phone1: text(20)
+	ct_phone2: text(20)
+	ct_mobile1: text(20)
+	ct_mobile2: text(20)
+	ct_phone_callback: text(20)
+	ct_name: text(50)
+	ct_surname: text(80)
+	ct_address: text(100)
+	ct_cust1_text01: text(50)
+	ct_cust1_text02: text(50)
+	ct_cust1_text03: text(50)
+	ct_cust1_text04: text(50)
+	ct_cust1_text05: text(50)
+	ct_cust1_text06: text(50)
+	ct_cust1_text07: text(50)
+	ct_cust1_text08: text(50)
+	ct_cust1_text09: text(50)
+	ct_cust1_text10: text(50)
+	ct_cust1_text11: text(50)
+	ct_cust1_text12: text(50)
+	ct_cust1_text13: text(50)
+	ct_cust2_text01: text(50)
+	ct_cust2_text02: text(50)
+	ct_cust2_text03: text(50)
+	ct_cust2_text04: text(50)
+	ct_cust2_text05: text(50)
+	ct_cust2_text06: text(50)
+	ct_cust2_text07: text(50)
+	ct_cust2_text08: text(50)
+	ct_cust2_text09: text(50)
+	ct_cust2_text10: text(50)
+	ct_cust2_text11: text(50)
+	ct_cust2_text12: text(50)
+	ct_cust2_text13: text(50)
+	ct_cust2_text14: text(50)
+	ct_cust2_text15: text(50)
+	ct_cust2_text16: text(50)
+	ct_cust2_text17: text(50)
+	ct_cust2_text18: text(50)
+	ct_cust2_text19: text(50)
+	ct_cust2_text20: text(50)
+	ct_cust3_text01: text(50)
+	ct_cust3_text02: text(50)
+	ct_cust3_text03: text(50)
+	ct_cust3_text04: text(50)
+	ct_cust3_text05: text(50)
+	ct_cust3_text06: text(50)
+	ct_cust3_text07: text(50)
+	ct_cust3_text08: text(50)
+	ct_cust3_text09: text(50)
+	ct_cust3_text10: text(50)
+	ct_cust3_text11: text(50)
+	ct_cust3_text12: text(50)
+	ct_cust3_text13: text(50)
+	ct_cust3_text14: text(50)
+	ct_cust3_text15: text(50)
+	ct_cust3_text16: text(50)
+	ct_cust3_text17: text(50)
+	ct_cust3_text18: text(50)
+	ct_cust3_text19: text(50)
+	ct_cust3_text20: text(50)
+}
+
+workflow record {}
+
+transferred record {}
+
+contact profile extensions {}
+
+outcome record {
+	multiscript_call_type: multiscript_outcomes
+		comment {UPGRADE WARNING: outcome record: 'call_type' outcome attribute created to support the upgrade of 'set call type' action to 'add to outcomes'}
+}
+
+cursors {
+	Call_Type: enumeration for multiscript_outcomes filter 'value >= $(v_min_outcome) AND value <= $(v_max_outcome)'
+	Call_Type_S: enumeration for multiscript_outcomes filter 'value = \'$(gv_outcome_enum)\''
+	cur_cttable: system for SystemCursor::contacts with directory @script_session_info.directory campaign @script_session_info.campaign columns "uniqueId", "firstName", "lastName", "homeStreet", "homePhone" filter '1=1 $(v_search_condition)'
+}
+
+subroutine cambiar_nombre_dia
+	(
+	v_calend_month: number,
+	v_calend_day: number,
+	v_calend_year: number
+	)
+	comment {Selecciona el día de la semana correspondiente}
+{
+	if v_calend_day > v_calend_last_day_month then {
+		v_calend_day := v_calend_last_day_month
+	}
+	else {}
+	case week_day(date(v_calend_year, v_calend_month, v_calend_day)) {
+		when 'monday' do {
+			v_calend_day_week := 'Monday'
+		}
+		when 'lunes' do {
+			v_calend_day_week := 'Monday'
+		}
+		when 'tuesday' do {
+			v_calend_day_week := 'Tuesday'
+		}
+		when 'martes' do {
+			v_calend_day_week := 'Tuesday'
+		}
+		when 'wednesday' do {
+			v_calend_day_week := 'Wednesday'
+		}
+		when 'miercoles' do {
+			v_calend_day_week := 'Wednesday'
+		}
+		when 'miércoles' do {
+			v_calend_day_week := 'Wednesday'
+		}
+		when 'thursday' do {
+			v_calend_day_week := 'Thursday'
+		}
+		when 'jueves' do {
+			v_calend_day_week := 'Thursday'
+		}
+		when 'friday' do {
+			v_calend_day_week := 'Friday'
+		}
+		when 'viernes' do {
+			v_calend_day_week := 'Friday'
+		}
+		when 'saturday' do {
+			v_calend_day_week := 'Saturday'
+		}
+		when 'sábado' do {
+			v_calend_day_week := 'Saturday'
+		}
+		when 'sunday' do {
+			v_calend_day_week := 'Sunday'
+		}
+		when 'domingo' do {
+			v_calend_day_week := 'Sunday'
+		}
+		default {
+			v_calend_day_week := 'Error'
+			message 'Error in date calculation.\r\n'
+				'day = \'$(v_calend_day)\'\r\n'
+				'month = \'$(v_calend_month)\'\r\n'
+				'year = \'$(v_calend_year)\'\r\n'
+				'case = $(week_day(date(v_calend_year, v_calend_month, v_calend_day)))'
+		}
+	}
+	call fecha_completa()
+}
+
+subroutine cambiar_mes
+	(
+	v_calend_month: number,
+	v_calend_day: number,
+	v_calend_year: number
+	)
+	comment {
+		Returns the name of the month selected, and the last day of that month
+		revised:
+		*compute for leap year
+		*requires ISLEAPYEAR function
+	}
+{
+	case v_calend_month {
+		when 1 do {
+			v_calend_name_month := 'January'
+			v_calend_last_day_month := 31
+		}
+		when 2 do {
+			v_calend_name_month := 'February'
+			if isLeapYear(v_calend_year) then {
+				v_calend_last_day_month := 29
+			}
+			else {
+				v_calend_last_day_month := 28
+			}
+		}
+		when 3 do {
+			v_calend_name_month := 'March'
+			v_calend_last_day_month := 31
+		}
+		when 4 do {
+			v_calend_name_month := 'April'
+			v_calend_last_day_month := 30
+		}
+		when 5 do {
+			v_calend_name_month := 'May'
+			v_calend_last_day_month := 31
+		}
+		when 6 do {
+			v_calend_name_month := 'June'
+			v_calend_last_day_month := 30
+		}
+		when 7 do {
+			v_calend_name_month := 'July'
+			v_calend_last_day_month := 31
+		}
+		when 8 do {
+			v_calend_name_month := 'August'
+			v_calend_last_day_month := 31
+		}
+		when 9 do {
+			v_calend_name_month := 'September'
+			v_calend_last_day_month := 30
+		}
+		when 10 do {
+			v_calend_name_month := 'October'
+			v_calend_last_day_month := 31
+		}
+		when 11 do {
+			v_calend_name_month := 'November'
+			v_calend_last_day_month := 30
+		}
+		when 12 do {
+			v_calend_name_month := 'December'
+			v_calend_last_day_month := 31
+		}
+		default {
+			message 'Error in month calculation, month name in english:\r\n'
+				'month = $(v_calend_month)\r\n'
+				'year = $(v_calend_year)\r\n'
+				'month_name = $(v_calend_name_month)'
+		}
+	}
+	if v_calend_day >= v_calend_last_day_month then {
+		v_calend_day := v_calend_last_day_month
+	}
+	else {}
+	case week_day(date(v_calend_year, v_calend_month, 1)) {
+		when 'monday' do {
+			v_calend_first_day := 1
+		}
+		when 'lunes' do {
+			v_calend_first_day := 1
+		}
+		when 'tuesday' do {
+			v_calend_first_day := 2
+		}
+		when 'martes' do {
+			v_calend_first_day := 2
+		}
+		when 'wednesday' do {
+			v_calend_first_day := 3
+		}
+		when 'miercoles' do {
+			v_calend_first_day := 3
+		}
+		when 'miércoles' do {
+			v_calend_first_day := 3
+		}
+		when 'thursday' do {
+			v_calend_first_day := 4
+		}
+		when 'jueves' do {
+			v_calend_first_day := 4
+		}
+		when 'friday' do {
+			v_calend_first_day := 5
+		}
+		when 'viernes' do {
+			v_calend_first_day := 5
+		}
+		when 'saturday' do {
+			v_calend_first_day := 6
+		}
+		when 'sabado' do {
+			v_calend_first_day := 6
+		}
+		when 'sábado' do {
+			v_calend_first_day := 6
+		}
+		when 'sunday' do {
+			v_calend_first_day := 7
+		}
+		when 'domingo' do {
+			v_calend_first_day := 7
+		}
+		default {
+			v_calend_first_day := 1
+			message 'Error in first day calculation.\r\n'
+				'day = \'$(v_calend_day)\'\r\n'
+				'month = \'$(v_calend_month)\'\r\n'
+				'year = \'$(v_calend_year)\'\r\n'
+				'case = $(week_day(date(v_calend_year, v_calend_month, 1)))'
+		}
+	}
+	var v_calend_i: number
+	for v_calend_i := 1 to 37 step 1 do {
+		v_calend_tabla_days[v_calend_i] := cte_calend_chr
+		v_calend_tabla_days_status[v_calend_i] := false
+	}
+	var v_desde_limite: number := 0
+	var v_hasta_limite: number := v_calend_last_day_month
+	if month(v_calend_date_from) = v_calend_month and year(v_calend_date_from) = v_calend_year then {
+		v_desde_limite := day(v_calend_date_from)
+		if v_calend_day < day(today()) then {
+			v_calend_day := day(today())
+		}
+		else {}
+	}
+	else {
+		v_desde_limite := 0
+	}
+	if month(v_calend_date_to) = v_calend_month and year(v_calend_date_to) = v_calend_year then {
+		v_hasta_limite := day(v_calend_date_to)
+	}
+	else {
+		v_hasta_limite := v_calend_last_day_month + 1
+	}
+	var v_cont: number := 1
+	for v_calend_i := v_calend_first_day to v_calend_last_day_month + v_calend_first_day - 1 step 1 do {
+		v_calend_tabla_days[v_calend_i] := v_cont
+		if v_desde_limite <= v_cont then {
+			v_calend_tabla_days_status[v_calend_i] := true
+		}
+		else {}
+		if v_hasta_limite < v_cont then {
+			v_calend_tabla_days_status[v_calend_i] := false
+		}
+		else {}
+		v_cont := v_cont + 1
+	}
+	call cambiar_nombre_dia(v_calend_month, v_calend_day, v_calend_year)
+}
+
+subroutine selecc_fecha
+	(
+	v_calend_day_test: text
+	)
+{
+	if v_calend_day_test <> '.' then {
+		v_calend_day := v_calend_day_test
+		v_calend_date_cto := date(v_calend_year, v_calend_month, v_calend_day_test)
+	}
+	else {}
+	call cambiar_nombre_dia(v_calend_month, v_calend_day, v_calend_year)
+	var v_date_actual: date := now() : date
+	if v_calend_date_cto < v_date_actual then {
+		comment {
+			message 'Callback time cannot be placed before current time.\r\n'
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			'Fecha y hora cambiadas al día y hora actual.\r\n'
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			'(@(weekday(now)), @(now))'}
+		v_calend_date_cto := now() : date
+		v_calend_hour_cto := now() : time
+		v_calend_day := day(today())
+		call cambiar_nombre_dia(v_calend_month, v_calend_day, v_calend_year)
+	}
+	else {}
+	call fecha_completa()
+	v_date_cto := date(v_calend_year, v_calend_month, v_calend_day)
+}
+
+subroutine fecha_completa()
+	comment {Compone la variable 'v_calend_date_complete' con el formato: "Monday, 30th DECEMBER 2002, 11:30h"}
+{
+	v_calend_date_complete := '$(v_calend_day_week), $(v_calend_day)th $(v_calend_name_month) $(v_calend_year), $(v_calend_hour_cto)h'
+}
+
+subroutine init_calendario()
+{
+	comment {****************************** Inicio CALENDARIO}
+	v_calend_date_from := now() : date
+	if campaign.cp_calend_to = '' then {
+		if campaign.cp_calend_days = '' then {
+			message 'Error: Neither cp_calend_to nor cp_calend_days\r\n'
+				'are defined.'
+		}
+		else {
+			v_calend_date_to := today() + campaign.cp_calend_days
+		}
+	}
+	else {
+		v_calend_date_to := campaign.cp_calend_to
+	}
+	call cambiar_mes(month(v_calend_date_from), day(v_calend_date_from), year(v_calend_date_from))
+	v_calend_text_from := '$(day(v_calend_date_from))th $(text_extract(v_calend_name_month, 1, 3)) $(year(v_calend_date_from))'
+	call cambiar_mes(month(v_calend_date_to), day(v_calend_date_to), year(v_calend_date_to))
+	v_calend_text_to := '$(day(v_calend_date_to))th $(text_extract(v_calend_name_month, 1, 3)) $(year(v_calend_date_to))'
+	comment {****************************** Fin CALENDARIO}
+}
+
+subroutine start_recording()
+{
+	if (not (g_bln_recording)) and (not (g_bln_errorRecording)) and ((@phone_info.state = PhoneState::connected)) then {
+		g_voiceFileName := text_append('$(campaign.cp_company)_$(getToday())_$(@script_session_info.contact)_$(@login_info.name)_$(@phone_info.phone)_$(contact.ct_name)_$(contact.ct_surname)', '.vox')
+		v_doRecording := true
+		extend phone for conference to extension campaign.cp_recording_ext
+			transfer values
+				attribute customerPhone := @phone_info.phone,
+				attribute customerCode := @script_session_info.contact,
+				attribute agentName := @login_info.name,
+				attribute agentExt := @login_info.extension,
+				attribute campaignName := @script_session_info.campaign,
+				attribute voiceFileName := g_voiceFileName
+	}
+	else {}
+}
+
+subroutine stop_recording()
+{
+	if (g_bln_recording) and ((@phone_info.state = PhoneState::connected)) then {
+		send digits campaign.cp_termination_key
+	}
+	else {}
+	v_doRecording := false
+	g_bln_recording := false
+}
+
+subroutine recordCall()
+{
+	comment {Start recording if cp_recording_ext set}
+	if campaign.cp_recording_ext <> '' then {
+		call start_recording()
+	}
+	else {}
+}
+
+subroutine sub_SetOutcome
+	(
+	p_enum_value: text(500)
+	)
+{
+	gv_outcome_enum := p_enum_value
+	contact.ct_call_type := p_enum_value
+	open cursor Call_Type_S
+	fetch cursor Call_Type_S absolute 1 into
+		variable contact.ct_call_type_desc, variable contact.ct_call_type_name, variable contact.ct_call_type_id
+	close cursor Call_Type_S
+	gv_outcome.multiscript_call_type := multiscript_outcomes::gv_outcome_enum
+	add to outcomes
+		values
+			record gv_outcome
+}
+
+subroutine Reschedule
+	(
+	p_reason: text
+	)
+{
+	case p_reason {
+		when '3000' do {
+			reschedule loaded contact with failed reason ContactFailedReason::machine
+		}
+		when '3001' do {
+			reschedule loaded contact with failed reason ContactFailedReason::busy
+		}
+		when '3002' do {
+			reschedule loaded contact with failed reason ContactFailedReason::fax
+		}
+		when '3003' do {
+			reschedule loaded contact with failed reason ContactFailedReason::noAnswer
+		}
+		default {}
+	}
+}
+
+function Modulo
+	(
+	p_nDividend: number(,0),
+	p_nDivisor: number(,0)
+	)
+	: number(,0)
+	comment {
+		old version of modulus division
+		Returns the remainder of the division
+	}
+{
+	var lv_nRemainer: number(,0)
+	lv_nRemainer := (p_nDividend / p_nDivisor)
+	Modulo := p_nDividend - (lv_nRemainer * p_nDivisor)
+}
+
+function isValidPhoneNum
+	(
+	numberCallback: text
+	)
+	: boolean
+	comment {
+		Returns true if the phone follows the format specified prefix + 9 digit
+	}
+{
+	var v_prefix: text
+	var prefixCallback: text
+	var suffixCallback: text
+	v_prefix := campaign.cp_prefix
+	prefixCallback := text_extract(numberCallback, 1, text_length(v_prefix))
+	suffixCallback := text_extract(numberCallback, text_length(v_prefix) + 1, text_length(numberCallback))
+	if isNumeric(numberCallback) then {
+		isValidPhoneNum := true
+	}
+	else {
+		isValidPhoneNum := false
+	}
+}
+
+function isNumber
+	(
+	numberInput: text
+	)
+	: boolean
+	comment {
+		Returns true if the string is a number
+	}
+{
+	var i: number
+	var length: number
+	i := 1
+	length := text_length(numberInput)
+	isNumber := true
+	while i <= length and isNumber do {
+		var num: text
+		num := text_extract(numberInput, i, i)
+		if num = "0" or num = "1" or num = "2" or num = "3" or num = "4" or num = "5" or num = "6" or num = "7" or num = "8" or num = "9" then {
+			isNumber := true
+		}
+		else {
+			isNumber := false
+		}
+		i := i + 1
+	}
+}
+
+function isPhoneNumber
+	(
+	numberInput: text
+	)
+	: boolean
+	comment {
+		Returns true if the string is a phone number, length 9 and starting with 6 or 9
+	}
+{
+	var i: number
+	var length: number
+	i := 2
+	length := text_length(numberInput)
+	isPhoneNumber := true
+	if length = campaign.cp_phone_length and (text_extract(numberInput, 1, 1) = "6" or text_extract(numberInput, 1, 1) = "9") then {
+		while i <= length and isPhoneNumber do {
+			var num: text
+			num := text_extract(numberInput, i, i)
+			if num = "0" or num = "1" or num = "2" or num = "3" or num = "4" or num = "5" or num = "6" or num = "7" or num = "8" or num = "9" then {
+				isPhoneNumber := true
+			}
+			else {
+				isPhoneNumber := false
+			}
+			i := i + 1
+		}
+	}
+	else {
+		isPhoneNumber := false
+	}
+}
+
+function getToday()
+	: text(10)
+	comment {
+		returns the current date
+	}
+{
+	var v_day: text(2)
+	var v_month: text(2)
+	var v_year: text(4)
+	v_day := day(today())
+	v_month := month(today())
+	v_year := year(today())
+	if text_length(v_day) = 1 then {
+		v_day := text_append("0", v_day)
+	}
+	else {}
+	if text_length(v_month) = 1 then {
+		v_month := text_append("0", v_month)
+	}
+	else {}
+	getToday := text_append(v_year, text_append(v_month, v_day))
+	return
+}
+
+function Right
+	(
+	l_String: text,
+	l_Length: number
+	)
+	: text
+	comment {
+		returns the characters from the right using a given length
+	}
+{
+	var l_lenofstring: number
+	Right := ''
+	if l_String <> '' then {
+		for l_lenofstring := text_length(l_String) to (text_length(l_String) - l_Length) + 1 step - 1 do {
+			Right := '$(text_extract(l_String, l_lenofstring, l_lenofstring))$(Right)'
+		}
+	}
+	else {}
+	return
+}
+
+function Left
+	(
+	l_String: text,
+	l_Length: number
+	)
+	: text
+	comment {
+		returns the characters from the left using a given length
+	}
+{
+	var l_lenofstring: number
+	Left := ''
+	if l_String <> '' then {
+		for l_lenofstring := 1 to l_Length step 1 do {
+			Left := '$(Left)$(text_extract(l_String, l_lenofstring, l_lenofstring))'
+		}
+	}
+	return
+}
+
+function Split
+	(
+	l_String: text,
+	l_Delimiter: text
+	)
+	: array of text
+	comment {
+		converts a string to array using a delimeter as a separator per array item
+	}
+{
+	var l_lenofstring: number
+	var l_ctr: number
+	var l_ctrS: number
+	comment {l_String := ',@(l_String)' comment {uncomment this line if you want to create a blank item at the start of the array}}
+	l_ctr := 1
+	l_ctrS := 0
+	l_String := '$(l_String)$(l_Delimiter)'
+	if l_String <> '' then {
+		for l_lenofstring := 1 to text_length(l_String) step 1 do {
+			if (text_extract(l_String, l_lenofstring, l_lenofstring)) = '$(l_Delimiter)' then {
+				add '$(text_extract(l_String, l_ctrS, l_lenofstring - 1))' to Split at l_ctr
+				l_ctrS := l_lenofstring + 1
+				l_ctr := l_ctr + 1
+			}
+		}
+	}
+	return
+}
+
+function Mod
+	(
+	l_Q1: number(,0),
+	l_Q2: number(,0)
+	)
+	: number
+	comment {
+		new modulus division function > retrieves the remainder of a division
+		requires FLOOR function
+	}
+{
+	var l_number: number(,0)
+	l_number := l_Q1 - (Floor(l_Q1 / l_Q2) * l_Q2)
+	Mod := l_number
+	return
+}
+
+function Floor
+	(
+	l_number: number
+	)
+	: number
+	comment {
+		returns the largest integer less than or equal to the specified numeric expression
+	}
+{
+	var l_cvnumber: number(,0)
+	l_cvnumber := l_number
+	if (l_cvnumber > l_number) then {
+		l_cvnumber := l_cvnumber - 1
+	}
+	Floor := l_cvnumber
+	return
+}
+
+function Ceiling
+	(
+	l_number: number
+	)
+	: number
+	comment {
+		returns the smallest integer greater than, or equal to, the specified numeric expression
+	}
+{
+	var l_cvnumber: number(,0)
+	l_cvnumber := l_number
+	if (l_cvnumber < l_number) then {
+		l_cvnumber := l_cvnumber + 1
+	}
+	Ceiling := l_cvnumber
+	return
+}
+
+function Rev
+	(
+	l_String: text
+	)
+	: text
+	comment {
+		returns the reverse order of a string value
+	}
+{
+	var l_lenofstring: number
+	Rev := ''
+	if l_String <> '' then {
+		for l_lenofstring := text_length(l_String) to 1 step - 1 do {
+			Rev := '$(Rev)$(text_extract(l_String, l_lenofstring, l_lenofstring))'
+		}
+	}
+	return
+}
+
+function isNumeric
+	(
+	l_Number: text
+	)
+	: boolean
+	comment {
+		* verifies if the passed string is a valid number
+		* it can also determine even if number is in decimal format
+		* (-) negative
+	}
+{
+	comment {holds the number of times the char. '.' (dot) appeared in the passed string}
+	comment {added new condition '(l_Number = '-0')'}
+	var l_holdstring: text
+	var l_lenofstring: number
+	var l_ctr: number
+	isNumeric := true
+	l_ctr := 0
+	if l_Number <> '' then {
+		for l_lenofstring := 1 to text_length(l_Number) step 1 do {
+			l_holdstring := text_extract(l_Number, l_lenofstring, l_lenofstring)
+			if (text_find('-.0123456789', l_holdstring) = 0) or (l_lenofstring > 1 and l_holdstring = '-') or ((l_lenofstring = 1 or l_lenofstring = text_length(l_Number)) and l_holdstring = '.') then {
+				isNumeric := false
+			}
+			if l_holdstring = '.' then {
+				l_ctr := l_ctr + 1
+				if l_ctr > 1 then {
+					isNumeric := false
+				}
+			}
+		}
+		if (text_find(l_Number, '-.') > 0) or (l_Number = '-0') then {
+			isNumeric := false
+		}
+	}
+	else {
+		isNumeric := false
+	}
+	return
+}
+
+function Trim
+	(
+	l_String: text
+	)
+	: text
+	comment {
+		removes the SPACES ( ) before and after the string / text 
+	}
+{
+	var l_holdstring: text
+	var l_holdmodstring: text
+	var l_lenofstring: number
+	var l_lastoccur: number
+	Trim := ''
+	if l_String <> '' then {
+		comment {
+			first loop 1 to N
+			remove ' ' (Space) Character at the Start of the String
+		}
+		l_lastoccur := 0
+		for l_lenofstring := 1 to text_length(l_String) step 1 do {
+			l_holdstring := text_extract(l_String, l_lenofstring, l_lenofstring)
+			if l_holdstring = ' ' and l_lenofstring = l_lastoccur + 1 then {
+				l_lastoccur := l_lastoccur + 1
+			}
+			else {
+				l_holdmodstring := '$(l_holdmodstring)$(l_holdstring)'
+			}
+		}
+		comment {
+			second loop N to 1
+			remove ' ' (Space) Character at the End of the String
+		}
+		l_lastoccur := text_length(l_holdmodstring)
+		for l_lenofstring := text_length(l_holdmodstring) to 1 step - 1 do {
+			l_holdstring := text_extract(l_holdmodstring, l_lenofstring, l_lenofstring)
+			if l_holdstring = ' ' and l_lenofstring = l_lastoccur then {
+				l_lastoccur := l_lastoccur - 1
+			}
+			else {
+				Trim := '$(l_holdstring)$(Trim)'
+			}
+		}
+	}
+	return
+}
+
+function isLeapYear
+	(
+	yearValue: number
+	)
+	: boolean
+	comment {
+		determines whether the yearValue has leap year
+		*requires FLOOR function
+		*requires MOD function
+	}
+{
+	var v_Leap_Year: number
+	v_Leap_Year := Modulo(yearValue, 4)
+	if v_Leap_Year = 0 then {
+		v_Leap_Year := Modulo(yearValue, 100)
+		if v_Leap_Year <> 0 then {
+			isLeapYear := true
+		}
+		else {
+			v_Leap_Year := Modulo(yearValue, 400)
+			if v_Leap_Year = 0 then {
+				isLeapYear := true
+			}
+			else {
+				isLeapYear := false
+			}
+		}
+	}
+	else {
+		isLeapYear := false
+	}
+}
+
+function Datediff
+	(
+	DatePart: text,
+	StartDate: datetime,
+	EndDate: datetime
+	)
+	: number
+	comment {
+		Returns the date difference between a date range in a specific date part
+		*requires GETMONTHLASTDAY function
+		*UNDER DEVELOPMENT
+	}
+{
+	var CTR: number
+	var monthCTR: number
+	var dayCTR: number
+	var hourCTR: number
+	var minuteCTR: number
+	var secondCTR: number
+	Datediff := 0
+	monthCTR := monthCTR + ((((year(EndDate) - year(StartDate)) + 1) * 12) - month(StartDate)) + month(EndDate)
+	if monthCTR > 1 then {
+		for CTR := month(StartDate) to monthCTR - 1 step 1 do {
+			if CTR <= 12 then {
+				dayCTR := dayCTR + GetMonthLastDay(datetime(year(StartDate), CTR, day(StartDate), hour(StartDate), minute(StartDate), second(StartDate)))
+			}
+			else {
+				dayCTR := dayCTR + GetMonthLastDay(datetime(year(StartDate), CTR - 12, day(StartDate), hour(StartDate), minute(StartDate), second(StartDate)))
+			}
+			CTR := CTR + 1
+		}
+		dayCTR := (dayCTR - day(StartDate)) + day(EndDate)
+	}
+	else {
+		dayCTR := day(EndDate) - day(StartDate)
+	}
+	if dayCTR > 0 then {
+		hourCTR := ((dayCTR * 24) - hour(StartDate)) + hour(EndDate)
+	}
+	else {
+		hourCTR := hour(StartDate) - hour(EndDate)
+	}
+	if hourCTR > 0 then {
+		minuteCTR := ((hourCTR * 60) - minute(StartDate)) + minute(EndDate)
+	}
+	else {
+		minuteCTR := minute(StartDate) - minute(EndDate)
+	}
+	if minuteCTR > 0 then {
+		secondCTR := ((minuteCTR * 24) - second(StartDate)) + second(EndDate)
+	}
+	else {
+		secondCTR := second(StartDate) - second(EndDate)
+	}
+	case DatePart {
+		when 'yyyy' do {
+			Datediff := Datediff + (year(EndDate) - year(StartDate))
+		}
+		when 'mm' do {
+			Datediff := Datediff + monthCTR
+		}
+		when 'dd' do {
+			Datediff := Datediff + dayCTR
+		}
+		when 'hh' do {
+			Datediff := Datediff + hourCTR
+		}
+		when 'mi' do {
+			Datediff := Datediff + minuteCTR
+		}
+		when 'ss' do {
+			Datediff := Datediff + secondCTR
+		}
+	}
+	return
+}
+
+function GetMonthLastDay
+	(
+	l_date: datetime
+	)
+	: number
+	comment {
+		returns the last day of the month	
+		*requires ISLEAPYEAR function
+	}
+{
+	var l_month: number
+	var v_Leap_Year: number
+	l_month := month(l_date)
+	case l_month {
+		when 4 do {
+			GetMonthLastDay := 30
+		}
+		when 6 do {
+			GetMonthLastDay := 30
+		}
+		when 11 do {
+			GetMonthLastDay := 30
+		}
+		when 9 do {
+			GetMonthLastDay := 30
+		}
+		when '2' do {
+			if isLeapYear(year(l_date)) then {
+				GetMonthLastDay := 29
+			}
+			else {
+				GetMonthLastDay := 28
+			}
+		}
+		when 1 do {
+			GetMonthLastDay := 31
+		}
+		when 3 do {
+			GetMonthLastDay := 31
+		}
+		when 5 do {
+			GetMonthLastDay := 31
+		}
+		when 7 do {
+			GetMonthLastDay := 31
+		}
+		when 8 do {
+			GetMonthLastDay := 31
+		}
+		when 10 do {
+			GetMonthLastDay := 31
+		}
+		when 12 do {
+			GetMonthLastDay := 31
+		}
+		default {
+			GetMonthLastDay := 31
+		}
+	}
+	return
+}
+
+function PadLeft
+	(
+	l_String: text,
+	l_NoofPadding: number,
+	l_CharPadding: text
+	)
+	: text
+	comment {}
+{
+	var l_lenofstring: number
+	PadLeft := ''
+	if l_String <> '' then {
+		if l_NoofPadding >= text_length(l_String) then {
+			for l_lenofstring := 1 to l_NoofPadding - text_length(l_String) step 1 do {
+				PadLeft := '$(PadLeft)$(l_CharPadding)'
+			}
+			PadLeft := '$(PadLeft)$(l_String)'
+		}
+		else {
+			PadLeft := l_String
+		}
+	}
+	return
+}
+
+function PadRight
+	(
+	l_String: text,
+	l_NoofPadding: number,
+	l_CharPadding: text
+	)
+	: text
+	comment {}
+{
+	var l_lenofstring: number
+	PadRight := ''
+	if l_String <> '' then {
+		if l_NoofPadding >= text_length(l_String) then {
+			for l_lenofstring := 1 to l_NoofPadding - text_length(l_String) step 1 do {
+				PadRight := '$(PadRight)$(l_CharPadding)'
+			}
+			PadRight := '$(l_String)$(PadRight)'
+		}
+		else {
+			PadRight := l_String
+		}
+	}
+	return
+}
+
+function StartFromCurrentYR
+	(
+	YRVal: number,
+	Range: number
+	)
+	: text(100)
+	comment {
+		used only for callback node
+		build a string of words / character with comma (,) delimited
+	}
+{
+	var CTR: number
+	var CTR2: number
+	var CurrYR: text
+	CTR2 := YRVal
+	for CTR := YRVal to YRVal + Range step 1 do {
+		CurrYR := CTR2
+		if StartFromCurrentYR = '' then {
+			StartFromCurrentYR := '$(StartFromCurrentYR)$(CurrYR)'
+		}
+		else {
+			StartFromCurrentYR := '$(StartFromCurrentYR),$(CurrYR)'
+		}
+		CTR2 := CTR2 + 1
+	}
+	return
+}
+
+function GetMonthName
+	(
+	l_month: text
+	)
+	: text
+	comment {
+		returns the name of month
+	}
+{
+	case l_month {
+		when 1 do {
+			GetMonthName := 'January'
+		}
+		when 2 do {
+			GetMonthName := 'February'
+		}
+		when 3 do {
+			GetMonthName := 'March'
+		}
+		when 4 do {
+			GetMonthName := 'April'
+		}
+		when 5 do {
+			GetMonthName := 'May'
+		}
+		when 6 do {
+			GetMonthName := 'June'
+		}
+		when 7 do {
+			GetMonthName := 'July'
+		}
+		when 8 do {
+			GetMonthName := 'August'
+		}
+		when 9 do {
+			GetMonthName := 'September'
+		}
+		when 10 do {
+			GetMonthName := 'October'
+		}
+		when 11 do {
+			GetMonthName := 'November'
+		}
+		when 12 do {
+			GetMonthName := 'December'
+		}
+		default {
+			GetMonthName := 'January'
+		}
+	}
+	return
+}
+
+function GetMonthNum
+	(
+	l_month: text
+	)
+	: number
+	comment {
+		returns the month using the month name
+	}
+{
+	case l_month {
+		when 'January' do {
+			GetMonthNum := 1
+		}
+		when 'February' do {
+			GetMonthNum := 2
+		}
+		when 'March' do {
+			GetMonthNum := 3
+		}
+		when 'April' do {
+			GetMonthNum := 4
+		}
+		when 'May' do {
+			GetMonthNum := 5
+		}
+		when 'June' do {
+			GetMonthNum := 6
+		}
+		when 'July' do {
+			GetMonthNum := 7
+		}
+		when 'August' do {
+			GetMonthNum := 8
+		}
+		when 'September' do {
+			GetMonthNum := 9
+		}
+		when 'October' do {
+			GetMonthNum := 10
+		}
+		when 'November' do {
+			GetMonthNum := 11
+		}
+		when 'December' do {
+			GetMonthNum := 12
+		}
+		default {
+			GetMonthNum := 1
+		}
+	}
+	return
+}
+
+function Dateadd
+	(
+	DatePart: text,
+	NumValue: number,
+	DateValue: datetime
+	)
+	: text
+{
+	var _i: number
+	var _year: number
+	_year := 0
+	var _month: number
+	_month := 0
+	var _day: number
+	_day := 0
+	var _hour: number
+	_hour := 0
+	var _min: number
+	_min := 0
+	var _sec: number
+	_sec := 0
+	_i := 0
+	var _manipyear: text
+	var _manipmonth: text
+	var _manipday: text
+	var _maniphour: text
+	var _manipmin: text
+	var _manipsec: text
+	_year := year(DateValue)
+	_month := month(DateValue)
+	_day := day(DateValue)
+	_hour := hour(DateValue)
+	_min := minute(DateValue)
+	_sec := second(DateValue)
+	comment {message Datediff('ss', '2012-01-03 14:00:00', '2013-03-03 16:00:25')}
+	var _ly: number
+	var _y: number
+	var _m: number
+	var _d: number
+	var _h: number
+	var _mi: number
+	var _s: number
+	var _ctr: number
+	_y := 0
+	_m := 0
+	_d := 0
+	_h := 0
+	_ly := 0
+	_mi := 0
+	_s := 0
+	_ctr := 0
+	_y := _year
+	_m := _month
+	_d := _day
+	_h := _hour
+	_mi := _min
+	_s := _sec
+	Dateadd := ''
+	if DatePart = 'yyyy' then {
+		for _i := 1 to NumValue step 1 do {
+			_y := _y + 1
+		}
+		_manipyear := _y
+		_manipmonth := _month
+		_manipday := _day
+		_maniphour := _hour
+		_manipmin := _min
+		_manipsec := _sec
+	}
+	if DatePart = 'mm' then {
+		comment {
+			var _tempmmyy: number
+			_tempmmyy := 0
+			var _tempmm: number
+			_tempmm := 0
+			var _modmonth: number
+			_modmonth := 0
+			_modmonth := NumValue + _month
+			_tempmmyy := _modmonth / 12
+			_tempmm := Floor(Mod(_modmonth, 12))
+			_manipyear := _tempmmyy + _year
+			_manipmonth := _tempmm}
+		for _i := 0 to NumValue step 1 do {
+			if _m = 13 then {
+				_y := _y + 1
+				_m := 1
+			}
+			else {
+				_m := _m + 1
+			}
+		}
+		_manipyear := _y
+		_manipmonth := _m
+		_manipday := _day
+		_maniphour := _hour
+		_manipmin := _min
+		_manipsec := _sec
+	}
+	if DatePart = 'dd' then {
+		var _tempmonth: number
+		_tempmonth := 0
+		_tempmonth := _day + NumValue
+		for _i := 1 to NumValue step 1 do {
+			if Mod(_y, 4) = 0 then {
+				_ly := 1
+			}
+			else {
+				_ly := 0
+			}
+			if _m = 1 then {
+				if _d > 30 then {
+					_d := 0
+					_m := _m + 1
+				}
+				else {
+					_d := _d + 1
+				}
+			}
+			if _m = 2 then {
+				if _d > 27 + _ly then {
+					_d := 0
+					_m := _m + 1
+				}
+				else {
+					_d := _d + 1
+				}
+			}
+			if _m = 3 then {
+				if _d > 30 then {
+					_d := 0
+					_m := _m + 1
+				}
+				else {
+					_d := _d + 1
+				}
+			}
+			if _m = 4 then {
+				if _d > 29 then {
+					_d := 0
+					_m := _m + 1
+				}
+				else {
+					_d := _d + 1
+				}
+			}
+			if _m = 5 then {
+				if _d > 30 then {
+					_d := 0
+					_m := _m + 1
+				}
+				else {
+					_d := _d + 1
+				}
+			}
+			if _m = 6 then {
+				if _d > 29 then {
+					_d := 0
+					_m := _m + 1
+				}
+				else {
+					_d := _d + 1
+				}
+			}
+			if _m = 7 then {
+				if _d > 30 then {
+					_d := 0
+					_m := _m + 1
+				}
+				else {
+					_d := _d + 1
+				}
+			}
+			if _m = 8 then {
+				if _d > 30 then {
+					_d := 0
+					_m := _m + 1
+				}
+				else {
+					_d := _d + 1
+				}
+			}
+			if _m = 9 then {
+				if _d > 29 then {
+					_d := 0
+					_m := _m + 1
+				}
+				else {
+					_d := _d + 1
+				}
+			}
+			if _m = 10 then {
+				if _d > 30 then {
+					_d := 0
+					_m := _m + 1
+				}
+				else {
+					_d := _d + 1
+				}
+			}
+			if _m = 11 then {
+				if _d > 29 then {
+					_d := 0
+					_m := _m + 1
+				}
+				else {
+					_d := _d + 1
+				}
+			}
+			if _m = 12 then {
+				if _d > 30 then {
+					_d := 0
+					_m := _m + 1
+				}
+				else {
+					_d := _d + 1
+				}
+			}
+			if _m = 13 then {
+				_m := 1
+				_d := 1
+				_y := _year + 1
+			}
+		}
+		_manipday := _d
+		_manipmonth := _m
+		_manipyear := _y
+		_maniphour := _hour
+		_manipmin := _min
+		_manipsec := _sec
+	}
+	if DatePart = 'hh' then {
+		for _i := 1 to NumValue step 1 do {
+			if Mod(_y, 4) = 0 then {
+				_ly := 1
+			}
+			else {
+				_ly := 0
+			}
+			if _m = 1 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 22 then {
+						_d := _d + 1
+						_h := 0
+					}
+					else {
+						_h := _h + 1
+					}
+				}
+			}
+			if _m = 2 then {
+				if _d > 27 + _ly then {
+					_d := 0
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 22 then {
+						_d := _d + 1
+						_h := 0
+					}
+					else {
+						_h := _h + 1
+					}
+				}
+			}
+			if _m = 3 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 22 then {
+						_d := _d + 1
+						_h := 0
+					}
+					else {
+						_h := _h + 1
+					}
+				}
+			}
+			if _m = 4 then {
+				if _d > 30 then {
+					_d := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 22 then {
+						_d := _d + 1
+						_h := 0
+					}
+					else {
+						_h := _h + 1
+					}
+				}
+			}
+			if _m = 5 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 22 then {
+						_d := _d + 1
+						_h := 0
+					}
+					else {
+						_h := _h + 1
+					}
+				}
+			}
+			if _m = 6 then {
+				if _d > 30 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 22 then {
+						_d := _d + 1
+						_h := 0
+					}
+					else {
+						_h := _h + 1
+					}
+				}
+			}
+			if _m = 7 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 22 then {
+						_d := _d + 1
+						_h := 0
+					}
+					else {
+						_h := _h + 1
+					}
+				}
+			}
+			if _m = 8 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 22 then {
+						_d := _d + 1
+						_h := 0
+					}
+					else {
+						_h := _h + 1
+					}
+				}
+			}
+			if _m = 9 then {
+				if _d > 30 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 22 then {
+						_d := _d + 1
+						_h := 0
+					}
+					else {
+						_h := _h + 1
+					}
+				}
+			}
+			if _m = 10 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 22 then {
+						_d := _d + 1
+						_h := 0
+					}
+					else {
+						_h := _h + 1
+					}
+				}
+			}
+			if _m = 11 then {
+				if _d > 30 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 22 then {
+						_d := _d + 1
+						_h := 0
+					}
+					else {
+						_h := _h + 1
+					}
+				}
+			}
+			if _m = 12 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 22 then {
+						_d := _d + 1
+						_h := 0
+					}
+					else {
+						_h := _h + 1
+					}
+				}
+			}
+			if _m = 13 then {
+				_m := 1
+				_d := 1
+				_h := 0
+				_y := _year + 1
+			}
+		}
+		_manipday := _d
+		_manipmonth := _m
+		_manipyear := _y
+		_maniphour := _h
+		_manipmin := _min
+		_manipsec := _sec
+	}
+	if DatePart = 'mi' then {
+		for _i := 1 to NumValue step 1 do {
+			if Mod(_y, 4) = 0 then {
+				_ly := 1
+			}
+			else {
+				_ly := 0
+			}
+			if _m = 1 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 23 then {
+						_d := _d + 1
+						_h := 0
+						_mi := _mi + 1
+					}
+					else {
+						if _mi > 58 then {
+							_mi := 0
+							_h := _h + 1
+						}
+						else {
+							_mi := _mi + 1
+						}
+					}
+				}
+			}
+			if _m = 2 then {
+				if _d > 28 + _ly then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 23 then {
+						_d := _d + 1
+						_h := 0
+						_mi := _mi + 1
+					}
+					else {
+						if _mi > 58 then {
+							_mi := 0
+							_h := _h + 1
+						}
+						else {
+							_mi := _mi + 1
+						}
+					}
+				}
+			}
+			if _m = 3 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 23 then {
+						_d := _d + 1
+						_h := 0
+						_mi := _mi + 1
+					}
+					else {
+						if _mi > 58 then {
+							_mi := 0
+							_h := _h + 1
+						}
+						else {
+							_mi := _mi + 1
+						}
+					}
+				}
+			}
+			if _m = 4 then {
+				if _d > 30 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 23 then {
+						_d := _d + 1
+						_h := 0
+						_mi := _mi + 1
+					}
+					else {
+						if _mi > 58 then {
+							_mi := 0
+							_h := _h + 1
+						}
+						else {
+							_mi := _mi + 1
+						}
+					}
+				}
+			}
+			if _m = 5 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 23 then {
+						_d := _d + 1
+						_h := 0
+						_mi := _mi + 1
+					}
+					else {
+						if _mi > 58 then {
+							_mi := 0
+							_h := _h + 1
+						}
+						else {
+							_mi := _mi + 1
+						}
+					}
+				}
+			}
+			if _m = 6 then {
+				if _d > 30 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 23 then {
+						_d := _d + 1
+						_h := 0
+						_mi := _mi + 1
+					}
+					else {
+						if _mi > 58 then {
+							_mi := 0
+							_h := _h + 1
+						}
+						else {
+							_mi := _mi + 1
+						}
+					}
+				}
+			}
+			if _m = 7 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 23 then {
+						_d := _d + 1
+						_h := 0
+						_mi := _mi + 1
+					}
+					else {
+						if _mi > 58 then {
+							_mi := 0
+							_h := _h + 1
+						}
+						else {
+							_mi := _mi + 1
+						}
+					}
+				}
+			}
+			if _m = 8 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 23 then {
+						_d := _d + 1
+						_h := 0
+						_mi := _mi + 1
+					}
+					else {
+						if _mi > 58 then {
+							_mi := 0
+							_h := _h + 1
+						}
+						else {
+							_mi := _mi + 1
+						}
+					}
+				}
+			}
+			if _m = 9 then {
+				if _d > 30 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 23 then {
+						_d := _d + 1
+						_h := 0
+						_mi := _mi + 1
+					}
+					else {
+						if _mi > 58 then {
+							_mi := 0
+							_h := _h + 1
+						}
+						else {
+							_mi := _mi + 1
+						}
+					}
+				}
+			}
+			if _m = 10 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 23 then {
+						_d := _d + 1
+						_h := 0
+						_mi := _mi + 1
+					}
+					else {
+						if _mi > 58 then {
+							_mi := 0
+							_h := _h + 1
+						}
+						else {
+							_mi := _mi + 1
+						}
+					}
+				}
+			}
+			if _m = 11 then {
+				if _d > 30 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 23 then {
+						_d := _d + 1
+						_h := 0
+						_mi := _mi + 1
+					}
+					else {
+						if _mi > 58 then {
+							_mi := 0
+							_h := _h + 1
+						}
+						else {
+							_mi := _mi + 1
+						}
+					}
+				}
+			}
+			if _m = 12 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_m := _m + 1
+				}
+				else {
+					if _h > 23 then {
+						_d := _d + 1
+						_h := 0
+						_mi := _mi + 1
+					}
+					else {
+						if _mi > 58 then {
+							_mi := 0
+							_h := _h + 1
+						}
+						else {
+							_mi := _mi + 1
+						}
+					}
+				}
+			}
+			if _m = 13 then {
+				_m := 1
+				_d := 1
+				_h := 0
+				_mi := 0
+				_y := _year + 1
+			}
+		}
+		_manipday := _d
+		_manipmonth := _m
+		_manipyear := _y
+		_maniphour := _h
+		_manipmin := _mi
+		_manipsec := _sec
+	}
+	if DatePart = 'ss' then {
+		for _i := 1 to NumValue step 1 do {
+			if Mod(_y, 4) = 0 then {
+				_ly := 1
+			}
+			else {
+				_ly := 0
+			}
+			if _m = 1 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_s := _s + 1
+				}
+				else {
+					if _h > 23 then {
+						_h := 0
+						_d := _d + 1
+						_s := _s + 1
+						_ctr := _ctr + 1
+					}
+					else {
+						if _mi > 59 then {
+							_mi := 0
+							_h := _h + 1
+							_s := _s + 1
+						}
+						else {
+							if _s > 58 then {
+								_mi := _mi + 1
+								_s := 0
+							}
+							else {
+								_s := _s + 1
+							}
+						}
+					}
+				}
+			}
+			if _m = 2 then {
+				if _d > 28 + _ly then {
+					_d := 1
+					_h := 0
+					_s := _s + 1
+				}
+				else {
+					if _h > 23 then {
+						_h := 0
+						_d := _d + 1
+						_s := _s + 1
+						_ctr := _ctr + 1
+					}
+					else {
+						if _mi > 59 then {
+							_mi := 0
+							_h := _h + 1
+							_s := _s + 1
+						}
+						else {
+							if _s > 58 then {
+								_mi := _mi + 1
+								_s := 0
+							}
+							else {
+								_s := _s + 1
+							}
+						}
+					}
+				}
+			}
+			if _m = 3 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_s := _s + 1
+				}
+				else {
+					if _h > 23 then {
+						_h := 0
+						_d := _d + 1
+						_s := _s + 1
+						_ctr := _ctr + 1
+					}
+					else {
+						if _mi > 59 then {
+							_mi := 0
+							_h := _h + 1
+							_s := _s + 1
+						}
+						else {
+							if _s > 58 then {
+								_mi := _mi + 1
+								_s := 0
+							}
+							else {
+								_s := _s + 1
+							}
+						}
+					}
+				}
+			}
+			if _m = 4 then {
+				if _d > 30 then {
+					_d := 1
+					_h := 0
+					_s := _s + 1
+				}
+				else {
+					if _h > 23 then {
+						_h := 0
+						_d := _d + 1
+						_s := _s + 1
+						_ctr := _ctr + 1
+					}
+					else {
+						if _mi > 59 then {
+							_mi := 0
+							_h := _h + 1
+							_s := _s + 1
+						}
+						else {
+							if _s > 58 then {
+								_mi := _mi + 1
+								_s := 0
+							}
+							else {
+								_s := _s + 1
+							}
+						}
+					}
+				}
+			}
+			if _m = 5 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_s := _s + 1
+				}
+				else {
+					if _h > 23 then {
+						_h := 0
+						_d := _d + 1
+						_s := _s + 1
+						_ctr := _ctr + 1
+					}
+					else {
+						if _mi > 59 then {
+							_mi := 0
+							_h := _h + 1
+							_s := _s + 1
+						}
+						else {
+							if _s > 58 then {
+								_mi := _mi + 1
+								_s := 0
+							}
+							else {
+								_s := _s + 1
+							}
+						}
+					}
+				}
+			}
+			if _m = 6 then {
+				if _d > 30 then {
+					_d := 1
+					_h := 0
+					_s := _s + 1
+				}
+				else {
+					if _h > 23 then {
+						_h := 0
+						_d := _d + 1
+						_s := _s + 1
+						_ctr := _ctr + 1
+					}
+					else {
+						if _mi > 59 then {
+							_mi := 0
+							_h := _h + 1
+							_s := _s + 1
+						}
+						else {
+							if _s > 58 then {
+								_mi := _mi + 1
+								_s := 0
+							}
+							else {
+								_s := _s + 1
+							}
+						}
+					}
+				}
+			}
+			if _m = 7 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_s := _s + 1
+				}
+				else {
+					if _h > 23 then {
+						_h := 0
+						_d := _d + 1
+						_s := _s + 1
+						_ctr := _ctr + 1
+					}
+					else {
+						if _mi > 59 then {
+							_mi := 0
+							_h := _h + 1
+							_s := _s + 1
+						}
+						else {
+							if _s > 58 then {
+								_mi := _mi + 1
+								_s := 0
+							}
+							else {
+								_s := _s + 1
+							}
+						}
+					}
+				}
+			}
+			if _m = 8 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_s := _s + 1
+				}
+				else {
+					if _h > 23 then {
+						_h := 0
+						_d := _d + 1
+						_s := _s + 1
+						_ctr := _ctr + 1
+					}
+					else {
+						if _mi > 59 then {
+							_mi := 0
+							_h := _h + 1
+							_s := _s + 1
+						}
+						else {
+							if _s > 58 then {
+								_mi := _mi + 1
+								_s := 0
+							}
+							else {
+								_s := _s + 1
+							}
+						}
+					}
+				}
+			}
+			if _m = 9 then {
+				if _d > 30 then {
+					_d := 1
+					_h := 0
+					_s := _s + 1
+				}
+				else {
+					if _h > 23 then {
+						_h := 0
+						_d := _d + 1
+						_s := _s + 1
+						_ctr := _ctr + 1
+					}
+					else {
+						if _mi > 59 then {
+							_mi := 0
+							_h := _h + 1
+							_s := _s + 1
+						}
+						else {
+							if _s > 58 then {
+								_mi := _mi + 1
+								_s := 0
+							}
+							else {
+								_s := _s + 1
+							}
+						}
+					}
+				}
+			}
+			if _m = 10 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_s := _s + 1
+				}
+				else {
+					if _h > 23 then {
+						_h := 0
+						_d := _d + 1
+						_s := _s + 1
+						_ctr := _ctr + 1
+					}
+					else {
+						if _mi > 59 then {
+							_mi := 0
+							_h := _h + 1
+							_s := _s + 1
+						}
+						else {
+							if _s > 58 then {
+								_mi := _mi + 1
+								_s := 0
+							}
+							else {
+								_s := _s + 1
+							}
+						}
+					}
+				}
+			}
+			if _m = 11 then {
+				if _d > 30 then {
+					_d := 1
+					_h := 0
+					_s := _s + 1
+				}
+				else {
+					if _h > 23 then {
+						_h := 0
+						_d := _d + 1
+						_s := _s + 1
+						_ctr := _ctr + 1
+					}
+					else {
+						if _mi > 59 then {
+							_mi := 0
+							_h := _h + 1
+							_s := _s + 1
+						}
+						else {
+							if _s > 58 then {
+								_mi := _mi + 1
+								_s := 0
+							}
+							else {
+								_s := _s + 1
+							}
+						}
+					}
+				}
+			}
+			if _m = 12 then {
+				if _d > 31 then {
+					_d := 1
+					_h := 0
+					_s := _s + 1
+				}
+				else {
+					if _h > 23 then {
+						_h := 0
+						_d := _d + 1
+						_s := _s + 1
+						_ctr := _ctr + 1
+					}
+					else {
+						if _mi > 59 then {
+							_mi := 0
+							_h := _h + 1
+							_s := _s + 1
+						}
+						else {
+							if _s > 58 then {
+								_mi := _mi + 1
+								_s := 0
+							}
+							else {
+								_s := _s + 1
+							}
+						}
+					}
+				}
+			}
+		}
+		_manipyear := _y
+		_manipmonth := _m
+		_manipday := _d
+		_maniphour := _h
+		_manipmin := _mi
+		_manipsec := _s
+	}
+	comment {Dateadd_new := '@(_manipyear)-@(_manipmonth)-@(_manipday) @(_maniphour):@(_manipmin):@(_manipsec)'}
+	var _outyear: text
+	var _outmonth: text
+	var _outday: text
+	var _outhour: text
+	var _outmin: text
+	var _outsec: text
+	_outyear := _y
+	_outmonth := _m
+	_outday := _d
+	_outhour := _h
+	_outmin := _mi
+	_outsec := _s
+	if text_length(_manipmonth) = 1 then {
+		comment {_outmonth := cat('0', _manipmonth)}
+		_outmonth := '0$(_manipmonth)'
+	}
+	if text_length(_manipday) = 1 then {
+		_outday := '0$(_manipday)'
+	}
+	if text_length(_maniphour) = 1 then {
+		_outhour := '0$(_maniphour)'
+	}
+	if text_length(_manipmin) = 1 then {
+		_outmin := '0$(_manipmin)'
+	}
+	if text_length(_manipsec) = 1 then {
+		_outsec := '0$(_manipsec)'
+	}
+	if _manipsec = 0 then {
+		if text_length(_manipsec) = 0 then {
+			_outsec := '00$(_manipsec)'
+		}
+		else {
+			_outsec := '0$(_manipsec)'
+		}
+	}
+	Dateadd := '$(_manipyear)-$(_outmonth)-$(_outday) $(_outhour):$(_outmin):$(_outsec)'
+	return
+}
+
+on start {
+	comment {UPGRADE WARNING: action 'sql select': 'into' set must now specify the type of each item: assuming 'variable' type; Suggestion: please evaluate the usage of 'record' type instead, if target item variable is of record type}
+	sql select 'select contacttable from cp_general_cfg cf, campaign c\r\n'
+		'where\r\n'
+		'cf.campaign = c.code\r\n'
+		'and c.shortname = \'$(@script_session_info.campaign)\'' into
+		variable v_cttable
+	call init_calendario()
+	v_doTransfer := false
+	g_bln_recording := false
+	v_doRecording := false
+	v_alreadyLoaded := false
+	v_sale := false
+	gv_dnis := @phone_info.dnis
+	gv_agent := @login_info.name
+	gv_contact_date := now()
+	contact.ct_dnis := gv_dnis
+	contact.ct_agent := gv_agent
+	contact.ct_contact_date := gv_contact_date
+	if contact.ct_num_calls = '' then {
+		contact.ct_num_calls := 1
+	}
+	else {
+		contact.ct_num_calls := contact.ct_num_calls + 1
+	}
+	g_bln_errorRecording := false
+	v_readyToTransfer := false
+	v_transfering := false
+	v_custom2_screen := campaign.cp_cust2_text01 <> '' or campaign.cp_cust2_text02 <> '' or campaign.cp_cust2_text03 <> '' or campaign.cp_cust2_text04 <> '' or campaign.cp_cust2_text05 <> '' or campaign.cp_cust2_text06 <> '' or campaign.cp_cust2_text07 <> '' or campaign.cp_cust2_text08 <> '' or campaign.cp_cust2_text09 <> '' or campaign.cp_cust2_text10 <> '' or campaign.cp_cust2_text11 <> '' or campaign.cp_cust2_text12 <> '' or campaign.cp_cust2_text13 <> '' or campaign.cp_cust2_text14 <> '' or campaign.cp_cust2_text15 <> '' or campaign.cp_cust2_text16 <> '' or campaign.cp_cust2_text17 <> '' or campaign.cp_cust2_text18 <> '' or campaign.cp_cust2_text19 <> '' or campaign.cp_cust2_text20 <> ''
+	v_custom3_screen := campaign.cp_cust3_text01 <> '' or campaign.cp_cust3_text02 <> '' or campaign.cp_cust3_text03 <> '' or campaign.cp_cust3_text04 <> '' or campaign.cp_cust3_text05 <> '' or campaign.cp_cust3_text06 <> '' or campaign.cp_cust3_text07 <> '' or campaign.cp_cust3_text08 <> '' or campaign.cp_cust3_text09 <> '' or campaign.cp_cust3_text10 <> '' or campaign.cp_cust3_text11 <> '' or campaign.cp_cust3_text12 <> '' or campaign.cp_cust3_text13 <> '' or campaign.cp_cust3_text14 <> '' or campaign.cp_cust3_text15 <> '' or campaign.cp_cust3_text16 <> '' or campaign.cp_cust3_text17 <> '' or campaign.cp_cust3_text18 <> '' or campaign.cp_cust3_text19 <> '' or campaign.cp_cust3_text20 <> ''
+	gn_id_win1 := 0
+	gn_id_win2 := 0
+	gn_id_win3 := 0
+	gv_phone := @phone_info.phone
+	if (@interaction_info.withEmailInteraction) then {
+		if (@email_info.state = EmailState::alerting) then {
+			comment {UPGRADE WARNING: action 'answer data interaction': dropped; Suggestion: depending on the media type being used, there is a correspondent action in new version}
+		}
+		else {}
+		contact.ct_email_ID := @email_info.emailId
+		goto node "EMAIL_RECIEVE"
+	}
+	else {}
+	goto node 'Welcome'
+}
+
+on end {
+	contact.ct_duration := now() - contact.ct_contact_date
+	if contact.ct_talk_time = '' or contact.ct_talk_time > contact.ct_duration then {
+		contact.ct_talk_time := contact.ct_duration
+	}
+	else {}
+	if g_bln_recording then {
+		call stop_recording()
+	}
+	else {}
+}
+
+node "MASTER" {
+	id 1
+
+	variables {}
+	cursors {}
+	on event phone disconnected()
+	{
+		if @script_info.windowId = SESSION_WINDOW_ID then {
+			contact.ct_talk_time := now() - contact.ct_contact_date
+		}
+	}
+	on event phone extended
+		(
+		user_name: text,
+		num: text
+		)
+	{
+		if @script_info.windowId = SESSION_WINDOW_ID then {
+			if v_doRecording then {
+				g_bln_recording := true
+				conference phone
+			}
+			else {}
+			if v_doTransfer then {
+				v_readyToTransfer := true
+			}
+			else {}
+		}
+	}
+	on error phone extend
+		(
+		err: PhoneError,
+		user_name: text,
+		num: text
+		)
+	{
+		comment {UPGRADE WARNING: node event handler 'on progress extend': 'err' formal of type 'number' is now of type 'PhoneError'}
+		if @script_info.windowId = SESSION_WINDOW_ID then {
+			if v_doRecording then {
+				g_bln_errorRecording := true
+				message 'Error starting recording: the call could not be recorded'
+			}
+			else {}
+			if v_doTransfer then {
+				v_transfering := false
+			}
+			else {}
+		}
+	}
+	on error phone transfer
+		(
+		err: PhoneError,
+		user_name: text,
+		num: text
+		)
+	{
+		comment {UPGRADE WARNING: node event handler 'on progress transfer': 'err' formal of type 'number' is now of type 'PhoneError'}
+		if @script_info.windowId = SESSION_WINDOW_ID then {
+			v_readyToTransfer := true
+			v_transfering := true
+		}
+	}
+
+	static box {
+		size 920,100 at 5,5
+		label "" {}
+		border sunken
+	}
+	input for contact.ct_comments {
+		size 790,70 at 130,500
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus {}
+		multiline
+	}
+	static text {
+		size 135,15 at 130,480
+		background transparent
+		label '$(b_comments)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+		}
+	}
+	static box {
+		size 920,50 at 5,580
+		label "" {}
+		border sunken
+	}
+	push button {
+		size 110,30 at 10,590
+		label b_back {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			back node
+		}
+		disabled if @script_info.node = "Welcome"
+	}
+	push button {
+		size 110,30 at 10,120
+		label b_redial {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			dial phone number gv_phone
+		}
+		disabled if ((@phone_info.state = PhoneState::connected)) or (@login_info.extension = '')
+	}
+	static text {
+		size 145,30 at 10,10
+		label @script_session_info.campaign {
+			font {
+				name "Arial"
+				size 13
+				bold
+				color rgb 15,137,210
+			}
+		}
+	}
+	static text {
+		size 205,15 at 715,10
+		label 'Transcom Corporate IT v1.93' {
+			font {
+				name "Arial"
+				size 7
+				bold
+				italic
+				color "Gray"
+			}
+			align right
+		}
+	}
+	static text {
+		size 101,15 at 115,30
+		label '$(campaign.cp_name)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 180,20 at 225,30
+		label '$(contact_profile.firstName)' {
+			font {
+				name "Arial"
+				size 8
+				color "Gray"
+			}
+		}
+	}
+	static text {
+		size 100,17 at 115,55
+		label '$(campaign.cp_surname)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 100,17 at 115,78
+		label '$(campaign.cp_address)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 180,22 at 225,78
+		label '$(contact_profile.homeStreet)' {
+			font {
+				name "Arial"
+				size 8
+				color "Gray"
+			}
+		}
+	}
+	static text {
+		size 180,22 at 225,55
+		label '$(contact_profile.lastName)' {
+			font {
+				name "Arial"
+				size 8
+				color "Gray"
+			}
+		}
+	}
+	static text {
+		size 86,15 at 415,30
+		label '$(campaign.cp_cust1_text01)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 140,20 at 510,30
+		label '$(contact_profile.homeCity)' {
+			font {
+				name "Arial"
+				size 8
+				color "Gray"
+			}
+		}
+	}
+	static text {
+		size 85,17 at 415,55
+		label '$(campaign.cp_cust1_text02)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 85,17 at 415,78
+		label '$(campaign.cp_cust1_text03)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 140,22 at 510,78
+		label '$(contact_profile.homeStateProvince)' {
+			font {
+				name "Arial"
+				size 8
+				color "Gray"
+			}
+		}
+	}
+	static text {
+		size 140,22 at 510,55
+		label '$(contact_profile.homePostalCode)' {
+			font {
+				name "Arial"
+				size 8
+				color "Gray"
+			}
+		}
+	}
+	static text {
+		size 71,15 at 25,50
+		label '$(b_phone)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			center
+		}
+	}
+	static text {
+		size 95,20 at 10,70
+		label @phone_info.phone {
+			font {
+				name "Arial"
+				size 8
+				color "Gray"
+			}
+			center
+		}
+	}
+	static text {
+		size 175,22 at 745,78
+		label '$(contact_profile.otherPhone)' {
+			font {
+				name "Arial"
+				size 8
+				color "Gray"
+			}
+		}
+	}
+	static text {
+		size 80,17 at 655,78
+		label '$(campaign.cp_cust1_text06)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 175,22 at 745,55
+		label '$(contact_profile.businessPhone)' {
+			font {
+				name "Arial"
+				size 8
+				color "Gray"
+			}
+		}
+	}
+	static text {
+		size 80,17 at 655,55
+		label '$(campaign.cp_cust1_text05)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 81,15 at 655,30
+		label '$(campaign.cp_cust1_text04)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 175,20 at 745,30
+		label '$(contact_profile.homePhone)' {
+			font {
+				name "Arial"
+				size 8
+				color "Gray"
+			}
+		}
+	}
+	push button {
+		size 110,30 at 10,210
+		label b_search_contact {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			goto node 'SearchContact'
+		}
+		disabled if campaign.cp_search <> 1
+	}
+	push button {
+		size 110,30 at 10,440
+		label '$(campaign.cp_arg1)' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			if gn_id_win1 > 0 then {
+				bring window to front with id gn_id_win1
+			}
+			else {
+				open window 'Arg1' at 50, 50 size 650, 600 caption campaign.cp_arg1 id into gn_id_win1
+			}
+		}
+		disabled if campaign.cp_arg1 = ''
+	}
+	push button {
+		size 110,30 at 10,530
+		label '$(campaign.cp_arg3)' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			if gn_id_win3 > 0 then {
+				bring window to front with id gn_id_win3
+			}
+			else {
+				open window 'Arg3' at 50, 50 size 650, 800 caption campaign.cp_arg3 id into gn_id_win3
+			}
+		}
+		disabled if campaign.cp_arg3 = ''
+	}
+	push button {
+		size 110,30 at 10,485
+		label '$(campaign.cp_arg2)' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			if gn_id_win2 > 0 then {
+				bring window to front with id gn_id_win2
+			}
+			else {
+				open window 'Arg2' at 50, 50 size 650, 800 caption campaign.cp_arg2 id into gn_id_win2
+			}
+		}
+		disabled if campaign.cp_arg2 = ''
+	}
+	static box {
+		size 120,230 at 5,110
+		background color "Window Background"
+		label "" {
+			font {
+				color "White"
+			}
+		}
+		border sunken
+	}
+	push button {
+		size 110,30 at 10,165
+		label b_am {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			comment {UPGRADE WARNING: action 'sql select': 'into' set must now specify the type of each item: assuming 'variable' type; Suggestion: please evaluate the usage of 'record' type instead, if target item variable is of record type}
+			comment {UPGRADE WARNING: action 'set call type': is now 'add to outcomes'; Suggestion: review if the assigned text value matches the new enumeration constant name defined in 'CallTypeValues' enumeration on server side}
+			call sub_SetOutcome(campaign.cp_code_am)
+			var reschCallDate: datetime
+			reschCallDate := now() + campaign.cp_hour_reschedule * 3600
+			comment {UPGRADE WARNING: action 'new call': 'at' option (moment): in arithmetic operations with 'time' type, the numeric representation of time value is now in 'total seconds' instead of 'total minutes'}
+			reschedule loaded contact at reschCallDate : date, reschCallDate : time outbound rule campaign.cp_dial_rule
+			contact.ct_num_recalls := contact.ct_num_recalls + 1
+			if (@phone_info.state = PhoneState::connected) then {
+				hang up phone
+			}
+			else {}
+			end script
+		}
+		tab order 999
+		disabled if (contact.ct_num_recalls > campaign.cp_max_reschedule) or (campaign.cp_code_am = '')
+	}
+	static box {
+		size 120,140 at 5,430
+		background color "Window Background"
+		label "" {
+			font {
+				color "White"
+			}
+		}
+		border sunken
+	}
+	static box {
+		size 120,80 at 5,345
+		label "" {
+			font {
+				color "Silver"
+			}
+		}
+		border sunken
+	}
+	on first enter {}
+	on enter {}
+	on exit {}
+}
+
+node "Welcome" {
+	id 62
+	master "MASTER"
+	variables {}
+	cursors {}
+	push button {
+		size 180,30 at 735,590
+		label b_data_input {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			goto node "DataInput1"
+		}
+	}
+	push button {
+		size 180,30 at 355,590
+		label b_callback {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			goto node 'Callback'
+		}
+		disabled if (contact.ct_num_recalls > campaign.cp_max_reschedule) or (campaign.cp_code_callback = '')
+	}
+	push button {
+		size 180,30 at 545,590
+		label b_no_contact {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_min_outcome := campaign.cp_no_contact_min
+			v_max_outcome := campaign.cp_no_contact_max
+			v_sale := false
+			goto node 'SetCallType'
+		}
+		disabled if (campaign.cp_no_contact_min = '') or (campaign.cp_no_contact_max = '')
+	}
+	static text {
+		size 530,255 at 240,170
+		background transparent
+		label '$(b_welcome)' {
+			font {
+				name "Arial"
+				size 12
+				bold
+				color rgb 15,137,210
+			}
+		}
+	}
+	on first enter {}
+	on enter {
+		if campaign.cp_language = 'es' or campaign.cp_language = 'ES' then {
+			b_redial := 'Reconectar'
+			b_record_call := 'Grabar llamada'
+			b_search_contact := 'Búsqueda contacto'
+			b_back := 'Atrás'
+			b_set_callback := 'Programar rellamada'
+			b_callback := 'Rellamada'
+			b_no_contact := 'Sin respuesta'
+			b_data_input := 'Entrada datos'
+			b_sale := 'Venta'
+			b_no_sale := 'Rechazo'
+			b_more_data := 'Más datos'
+			b_end := 'Finalizar'
+			b_clear := 'Borrar'
+			b_search := 'Buscar'
+			b_close := 'Cerrar'
+			b_refuse := 'Rechazar'
+			b_load := 'Cargar'
+			b_phone := 'Teléfono'
+			b_priority := 'Prioridad'
+			b_low := 'Baja'
+			b_med := 'Media'
+			b_high := 'Alta'
+			b_from := 'Desde'
+			b_to := 'Hasta'
+			b_day := 'Dia'
+			b_time := 'Hora'
+			b_afternoon := 'Mediodia (3pm)'
+			b_evening := 'Tarde (6pm)'
+			b_night := 'Noche (21pm)'
+			b_myself := 'Rellamada a mi mismo'
+			b_other := 'Otro'
+			b_transfer_ag := 'Transferir a agente'
+			b_transfer := 'Transferir llamada'
+			b_am := 'Contestador'
+			b_welcome := 'Buenos dias. Soy $(@login_info.fullName) de $(campaign.cp_company). ¿Podria hablar con $(contact.ct_name) $(contact.ct_surname), por favor? '
+			b_outcome := 'Selecciona un outcome (código de cierre)'
+			b_search_customer := 'Introduce el nombre, apellido, direccion y/o teléfono del contacto a buscar'
+			b_select_customer := 'Selecciona un contacto'
+			b_desired_customer := '¿Es este el contacto que se desea cargar?'
+			b_comments := 'Comentarios'
+		}
+		else {
+			if campaign.cp_language = 'fr' or campaign.cp_language = 'FR' then {
+				b_redial := 'Marquage Automatique'
+				b_record_call := 'Enregistrer Conversation'
+				b_search_contact := 'Chercher Fiche Client'
+				b_back := 'Retour'
+				b_set_callback := 'Fixer Rappel'
+				b_callback := 'Rappel'
+				b_no_contact := 'Injoinable'
+				b_data_input := 'Entrée Données'
+				b_sale := 'Vente'
+				b_no_sale := 'Refus'
+				b_more_data := '+ de Données'
+				b_end := 'Fin'
+				b_clear := 'Effacer'
+				b_search := 'Chercher'
+				b_close := 'Fermer'
+				b_refuse := 'Refus'
+				b_load := 'Charger fiches client'
+				b_phone := 'Téléphone'
+				b_priority := 'Priorité'
+				b_low := 'Bas'
+				b_med := 'Moyen'
+				b_high := 'Haut'
+				b_from := 'De'
+				b_to := 'À'
+				b_day := 'Jour'
+				b_time := 'Heure'
+				b_afternoon := 'Après-midi (3pm)'
+				b_evening := 'Fin d\'Après-midi (6pm)'
+				b_night := 'Soir (21pm)'
+				b_myself := 'Moi-même'
+				b_other := 'Autre'
+				b_transfer_ag := 'Transfer vers un agent'
+				b_transfer := 'Transfer appel'
+				b_am := 'Répondeur'
+				b_welcome := 'Bonjours/Bonsoir je se suis monsieur/madame $(@login_info.fullName) de la société $(campaign.cp_company) puis-je parler a Monsieur/madame $(contact.ct_name) $(contact.ct_surname) s’il vous plaît?'
+				b_outcome := 'Veuillez insérer un résultat'
+				b_search_customer := 'Veuillez insérer le nom, prénom, adresse ou numéro de téléphone du client'
+				b_select_customer := 'Sélectionnez un client'
+				b_desired_customer := 'Est-ce le client recherché?'
+				b_comments := 'Commentaires'
+			}
+			else {
+				if campaign.cp_language = 'it' or campaign.cp_language = 'IT' then {
+					b_redial := 'Richiama'
+					b_record_call := 'Registra chiamata'
+					b_search_contact := 'Cerca anagrafica'
+					b_back := 'Indietro'
+					b_set_callback := 'Imposta callback'
+					b_callback := 'Callback'
+					b_no_contact := 'Non risponde'
+					b_data_input := 'Inserisci dati'
+					b_sale := 'Vendita'
+					b_no_sale := 'Rifiuto'
+					b_more_data := 'Dati aggiuntivi'
+					b_end := 'Fine'
+					b_clear := 'Cancella campi'
+					b_search := 'Ricerca'
+					b_close := 'Chiudi'
+					b_refuse := 'Non caricare'
+					b_load := 'Carica'
+					b_phone := 'Telefono'
+					b_priority := 'Priorità'
+					b_low := 'Bassa'
+					b_med := 'Media'
+					b_high := 'Alta'
+					b_from := 'Da'
+					b_to := 'A'
+					b_day := 'Data'
+					b_time := 'Ora'
+					b_afternoon := 'Pomeriggio (3pm)'
+					b_evening := 'Sera (6pm)'
+					b_night := 'Notte (21pm)'
+					b_myself := 'Reimposta per me'
+					b_other := 'Altro'
+					b_transfer_ag := 'Trasferisci ad agente'
+					b_transfer := 'Trasferisci chiamata'
+					b_am := 'Segreteria'
+					b_welcome := 'Salve. Sono $(@login_info.fullName) de $(campaign.cp_company). Potrei parlare con $(contact.ct_name) $(contact.ct_surname), per favore?'
+					b_outcome := 'Per favore seleziona un esito chiamata'
+					b_search_customer := 'Per favore inserisci nome, cognome, indirizzo e telefono del contatto'
+					b_select_customer := 'Seleziona un contatto'
+					b_desired_customer := 'E questo il cliente desiderato?'
+					b_comments := 'Commenti'
+				}
+				else {
+					if campaign.cp_language = 'en' or campaign.cp_language = 'EN' then {
+						b_redial := 'Redial'
+						b_record_call := 'Record call'
+						b_search_contact := 'Search contact'
+						b_back := 'Back'
+						b_set_callback := 'Set callback'
+						b_callback := 'Callback'
+						b_no_contact := 'No answer'
+						b_data_input := 'Data input'
+						b_sale := 'Sale'
+						b_no_sale := 'Refusal'
+						b_more_data := 'More data'
+						b_end := 'Finish'
+						b_clear := 'Clear'
+						b_search := 'Search'
+						b_close := 'Close'
+						b_refuse := 'Refuse'
+						b_load := 'Load'
+						b_phone := 'Telephone'
+						b_priority := 'Priority'
+						b_low := 'Low'
+						b_med := 'Medium'
+						b_high := 'High'
+						b_from := 'From'
+						b_to := 'To'
+						b_day := 'Date'
+						b_time := 'Time'
+						b_afternoon := 'Afternoon (3pm)'
+						b_evening := 'Evening (6pm)'
+						b_night := 'Night (21pm)'
+						b_myself := 'Reschedule to myself'
+						b_other := 'Other'
+						b_transfer_ag := 'Transfer to agent'
+						b_transfer := 'Transfer call'
+						b_am := 'Answering Machine'
+						b_welcome := 'Good morning/afternoon/evening. This is $(@login_info.fullName) from $(campaign.cp_company). Could I speak with $(contact.ct_name) $(contact.ct_surname), please?'
+						b_outcome := 'Please select an outcome'
+						b_search_customer := 'Please enter the contact name, surname, address or phone'
+						b_select_customer := 'Select a contact'
+						b_desired_customer := 'Is this the desired contact?'
+						b_comments := 'Comments'
+					}
+					else {
+						if campaign.cp_language = 'de' or campaign.cp_language = 'DE' then {
+							b_redial := 'Wiederwahl'
+							b_record_call := 'Anrufaufnahme'
+							b_search_contact := 'Kontakt suchen'
+							b_back := 'Zurück'
+							b_set_callback := 'Rückruf vereinbaren'
+							b_callback := 'Rückruf'
+							b_no_contact := 'Kein Kontakt'
+							b_data_input := 'Dateneingabe'
+							b_sale := 'Verkauf'
+							b_no_sale := 'Kein Verkauf'
+							b_more_data := 'Zusätzliche Daten'
+							b_end := 'Abgeschlossen'
+							b_clear := 'Löschen'
+							b_search := 'Suchen'
+							b_close := 'Abschließen'
+							b_refuse := 'Ablehnen'
+							b_load := 'Laden'
+							b_phone := 'Telefonnummer'
+							b_priority := 'Wichtigkeit'
+							b_low := 'Nieder'
+							b_med := 'Mittel'
+							b_high := 'Hoch'
+							b_from := 'Von'
+							b_to := 'Zu'
+							b_day := 'Datum'
+							b_time := 'Zeit'
+							b_afternoon := 'Nachmittag (15:00)'
+							b_evening := 'Abends (18:00)'
+							b_night := 'Nacht (21:00)'
+							b_myself := 'Rückruf für mich im Kalender eintragen'
+							b_other := 'Andere'
+							b_transfer_ag := 'Weiterleitung zum Agent'
+							b_transfer := 'Anrufweiterleitung'
+							b_am := 'Anrufbeantworter'
+							b_welcome := 'Guten Morgen / Tag / Abend. Hier spricht $(@login_info.fullName) von $(campaign.cp_company). Kann ich bitte mit $(contact.ct_name) $(contact.ct_surname) sprechen?'
+							b_outcome := 'Dispo eingeben'
+							b_search_customer := 'Tragen Sie bitte Ihnen Vorname, Familienname, Adresse oder Telefonnummer'
+							b_select_customer := 'Kunden auswählen'
+							b_desired_customer := 'Ist das der gewünschte Kunde?'
+							b_comments := 'Kommentar'
+						}
+						else {
+							if campaign.cp_language = 'lt' or campaign.cp_language = 'LT' then {
+								b_redial := 'Perskambinti'
+								b_record_call := 'Irašyti skambuti'
+								b_search_contact := 'Ieškoti kontakto'
+								b_back := 'Atgal'
+								b_set_callback := 'Nustatyti perskambinima'
+								b_callback := 'Perskambinimas'
+								b_no_contact := 'Neatsiliepia'
+								b_data_input := 'Duomenu ivedimas'
+								b_sale := 'Pardavimas'
+								b_no_sale := 'Atsisake'
+								b_more_data := 'Daugiau duomenu'
+								b_end := 'Pabaiga'
+								b_clear := 'Ištrinti'
+								b_search := 'Ieškoti'
+								b_close := 'Uždaryti'
+								b_refuse := 'Atsisakyti'
+								b_load := 'Užkrauti'
+								b_phone := 'Telefonas'
+								b_priority := 'Prioritetas'
+								b_low := 'Žemas'
+								b_med := 'Vidutinis'
+								b_high := 'Aukštas'
+								b_from := 'Nuo'
+								b_to := 'Kam'
+								b_day := 'Data'
+								b_time := 'Laikas'
+								b_afternoon := 'Popiete (nuo 15val)'
+								b_evening := 'Vakaras (nuo 18val)'
+								b_night := 'Velus vakaras (po 21val)'
+								b_myself := 'Priskirti man'
+								b_other := 'Kita'
+								b_transfer_ag := 'Persiusti agentui'
+								b_transfer := 'Perjungti skambuti'
+								b_am := 'Autoatsakiklis'
+								b_welcome := 'Labas rytas/diena/vakaras. Mano vardas $(@login_info.fullName) skambinu $(campaign.cp_company) vardu. Ar galeciau kalbeti su $(contact.ct_name) $(contact.ct_surname)?'
+								b_outcome := 'Pasirinkite pabaigos koda'
+								b_search_customer := 'Iveskite kliento varda, pavarde, adresa ar telefona'
+								b_select_customer := 'Pasirinkite klienta'
+								b_desired_customer := 'Ar pasirinktas teisingas klientas?'
+								b_comments := 'Komentarai'
+							}
+							else {
+								if campaign.cp_language = 'nl' or campaign.cp_language = 'NL' then {
+									b_redial := 'Terug opbellen'
+									b_record_call := 'Oproep opnemen'
+									b_search_contact := 'Kontakt opzoeken'
+									b_back := 'Terug'
+									b_set_callback := 'Callback plaatsen'
+									b_callback := 'Callback'
+									b_no_contact := 'Geen antwoord'
+									b_data_input := 'Gegevens introduceren'
+									b_sale := 'Verkoop'
+									b_no_sale := 'Weigering'
+									b_more_data := 'Meer gegevens'
+									b_end := 'Beëindigen'
+									b_clear := 'Uitwissen'
+									b_search := 'Zoeken'
+									b_close := 'Sluiten'
+									b_refuse := 'Weigeren'
+									b_load := 'Opladen'
+									b_phone := 'Telefoon'
+									b_priority := 'Prioriteit'
+									b_low := 'Laag'
+									b_med := 'Medium'
+									b_high := 'Hoog'
+									b_from := 'Van'
+									b_to := 'Naar'
+									b_day := 'Datum'
+									b_time := 'Tijdstip'
+									b_afternoon := 'Namiddag (3pm)'
+									b_evening := 'Avond (6pm)'
+									b_night := 'Nacht (9pm)'
+									b_myself := 'Aan mijzelf herprogrameren'
+									b_other := 'Andere'
+									b_transfer_ag := 'Naar een agent doorsturen'
+									b_transfer := 'Oproep doorsturen'
+									b_am := 'Antwoordapparaat'
+									b_welcome := 'Goede morgen/namiddag/avond. U spreekt met $(@login_info.fullName) van $(campaign.cp_company). Zou ik met $(contact.ct_name) $(contact.ct_surname) mogen spreken, AUB ?'
+									b_outcome := 'Kies een resultaat, AUB.'
+									b_search_customer := 'Introduceer de naam, voornaam, adres of telefoon nummer van de kontakt, AUB.'
+									b_select_customer := 'Kies een kontakt'
+									b_desired_customer := 'Is dit de gewenste kontakt?'
+									b_comments := 'Opmerkingen'
+								}
+								else {
+									if campaign.cp_language = 'sv' or campaign.cp_language = 'SV' then {
+										b_redial := 'Återuppring'
+										b_record_call := 'Spela in samtal'
+										b_search_contact := 'Sök kontakt'
+										b_back := 'Tillbaks'
+										b_set_callback := 'Ring senare'
+										b_callback := 'Ring senare'
+										b_no_contact := 'Bortfall'
+										b_data_input := 'Kund Info'
+										b_sale := 'Sälj'
+										b_no_sale := 'Vägrar'
+										b_more_data := 'Mer info'
+										b_end := 'Avsluta'
+										b_clear := 'Rensa'
+										b_search := 'Sök'
+										b_close := 'Stäng'
+										b_refuse := 'Vägra'
+										b_load := 'Ladda'
+										b_phone := 'Telefon'
+										b_priority := 'Prioritet'
+										b_low := 'Låg'
+										b_med := 'Mellan'
+										b_high := 'Hög'
+										b_from := 'Från'
+										b_to := 'Till'
+										b_day := 'Datum'
+										b_time := 'Tid'
+										b_afternoon := 'Eftermiddag (15:00)'
+										b_evening := 'Kväll (18:00)'
+										b_night := 'Natt (21:00)'
+										b_myself := 'Omdirigera till mig själv'
+										b_other := 'Annat'
+										b_transfer_ag := 'Omdirigera till agent'
+										b_transfer := 'Omdirigera samtal'
+										b_am := 'Telefonsvarare'
+										b_welcome := 'God morgon/eftermiddag/kväll. Detta är $(@login_info.fullName) från $(campaign.cp_company). Skulle jag kunna få tala med $(contact.ct_name) $(contact.ct_surname)?'
+										b_outcome := 'Var god välj en av alternativen'
+										b_search_customer := 'Var god ange kontakt namn, efternamn, adress eller telefonnummer'
+										b_select_customer := 'Välj en kontakt'
+										b_desired_customer := 'Är detta den önskade kontakten?'
+										b_comments := 'Kommentarer'
+									}
+									else {
+										if campaign.cp_language = 'da' or campaign.cp_language = 'DA' then {
+											b_redial := 'Redial'
+											b_record_call := 'Record call'
+											b_search_contact := 'Search contact'
+											b_back := 'Back'
+											b_set_callback := 'Set callback'
+											b_callback := 'Callback'
+											b_no_contact := 'No answer'
+											b_data_input := 'Data input'
+											b_sale := 'Sale'
+											b_no_sale := 'Refusal'
+											b_more_data := 'More data'
+											b_end := 'Finish'
+											b_clear := 'Clear'
+											b_search := 'Search'
+											b_close := 'Close'
+											b_refuse := 'Refuse'
+											b_load := 'Load'
+											b_phone := 'Telephone'
+											b_priority := 'Priority'
+											b_low := 'Low'
+											b_med := 'Medium'
+											b_high := 'High'
+											b_from := 'From'
+											b_to := 'To'
+											b_day := 'Date'
+											b_time := 'Time'
+											b_afternoon := 'Afternoon (3pm)'
+											b_evening := 'Evening (6pm)'
+											b_night := 'Night (21pm)'
+											b_myself := 'Reschedule to myself'
+											b_other := 'Other'
+											b_transfer_ag := 'Transfer to agent'
+											b_transfer := 'Transfer call'
+											b_am := 'Answering Machine'
+											b_welcome := 'Goddag. Jeg hedder $(@login_info.fullName) og jeg ringer fra $(campaign.cp_company). Må jeg tale med $(contact.ct_name) $(contact.ct_surname)?'
+											b_outcome := 'Please select an outcome'
+											b_search_customer := 'Please enter the contact name, surname, address or phone'
+											b_select_customer := 'Select a contact'
+											b_desired_customer := 'Is this the desired contact?'
+											b_comments := 'Comments'
+										}
+										else {
+											if campaign.cp_language = 'no' or campaign.cp_language = 'NO' then {
+												b_redial := 'Ring om igjen'
+												b_record_call := 'Register samtale'
+												b_search_contact := 'Søk kontakt'
+												b_back := 'Tilbake'
+												b_set_callback := 'Sett gjenoppkall'
+												b_callback := 'Ring tilbake'
+												b_no_contact := 'Ikke svar'
+												b_data_input := 'Data tilførsel'
+												b_sale := 'Salg'
+												b_no_sale := 'Avslag'
+												b_more_data := 'Mer data'
+												b_end := 'Ferdig'
+												b_clear := 'Klar'
+												b_search := 'Søk'
+												b_close := 'Lukk'
+												b_refuse := 'Avvise'
+												b_load := 'Lade'
+												b_phone := 'Telefon'
+												b_priority := 'Prioritet'
+												b_low := 'Lav'
+												b_med := 'Middels'
+												b_high := 'Høy'
+												b_from := 'Fra'
+												b_to := 'Til'
+												b_day := 'Dato'
+												b_time := 'Tid'
+												b_afternoon := 'Ettermiddag (kl. 15.00)'
+												b_evening := 'Aften (kl. 18.00)'
+												b_night := 'Kveld (kl.21.00)'
+												b_myself := 'Omplanlegg til meg selv'
+												b_other := 'Andre'
+												b_transfer_ag := 'Overfør til kundebehandler'
+												b_transfer := 'Overfør samtale'
+												b_am := 'Telefonsvarer'
+												b_welcome := 'God morgen/dag/aften. Dette er $(@login_info.fullName) fra $(campaign.cp_company). Kan jeg vennligst få snakke med $(contact.ct_name) $(contact.ct_surname)?'
+												b_outcome := 'Vennligst velg et resultat'
+												b_search_customer := 'Vennligst skriv kontakt navn, etternavn, adresse eller telefonnummer'
+												b_select_customer := 'Velg en kontakt'
+												b_desired_customer := 'Er det denne kontakten du ønsker?'
+												b_comments := 'Kommentarer'
+											}
+											else {
+												if campaign.cp_language = 'hu' or campaign.cp_language = 'HU' then {
+													b_redial := 'Újrahívás'
+													b_record_call := 'Felvétel'
+													b_search_contact := 'Ügyfél keresés'
+													b_back := 'Vissza'
+													b_set_callback := 'Visszahívás beállítás'
+													b_callback := 'Visszahívás'
+													b_no_contact := 'Nincs válasz'
+													b_data_input := 'Adatbevitel'
+													b_sale := 'Sikeres'
+													b_no_sale := 'Visszautasít'
+													b_more_data := 'További adatok'
+													b_end := 'Befejezés'
+													b_clear := 'Töröl'
+													b_search := 'Keres'
+													b_close := 'Bezár'
+													b_refuse := 'Sikertelen'
+													b_load := 'Betölt'
+													b_phone := 'Telefonszám'
+													b_priority := 'Prioritás'
+													b_low := 'Alacsony'
+													b_med := 'Közepes'
+													b_high := 'Magas'
+													b_from := 'Kezdés:'
+													b_to := 'Zárás:'
+													b_day := 'Dátum'
+													b_time := 'Idö'
+													b_afternoon := 'Délután (3 óra)'
+													b_evening := 'Délután (6 óra)'
+													b_night := 'Este (9 óra)'
+													b_myself := 'Újraütemez'
+													b_other := 'Egyéb'
+													b_transfer_ag := 'Ügynökhöz átirányítás'
+													b_transfer := 'Hívás átirányítás'
+													b_am := 'Üzenetrögzítö'
+													b_welcome := 'Jó reggelt / napot / estét kívánok!\r\n'
+														'$(@login_info.fullName) vagyok a $(campaign.cp_company) megbízásából.\r\n'
+														'$(contact.ct_surname) $(contact.ct_name)-val/vel szeretnék beszélni.'
+													b_outcome := 'Kérem, válassza ki a hívás kimenetelét'
+													b_search_customer := 'Kérem adja meg az ügyfél nevét, címét vagy telefonszámát'
+													b_select_customer := 'Válasszon ügyfelet'
+													b_desired_customer := 'Ez a keresett ügyfél?'
+													b_comments := 'Megjegyzés'
+												}
+												else {
+													if campaign.cp_language = 'et' or campaign.cp_language = 'ET' then {
+														b_redial := 'Uuesti valimine'
+														b_record_call := 'Salvesta kõne'
+														b_search_contact := 'Otsi kontakti'
+														b_back := 'Tagasi'
+														b_set_callback := 'Fikseeri tagasi helistamine'
+														b_callback := 'Tagasi helistamine'
+														b_no_contact := 'Ei vasta'
+														b_data_input := 'Info sisestamine'
+														b_sale := 'Müük'
+														b_no_sale := 'Eitav vastus'
+														b_more_data := 'Lisa info'
+														b_end := 'Lõpp'
+														b_clear := 'Puhasta'
+														b_search := 'Osti'
+														b_close := 'Sulge'
+														b_refuse := 'Ei soovi'
+														b_load := 'Lae'
+														b_phone := 'Telefon'
+														b_priority := 'Prioriteet'
+														b_low := 'Madal'
+														b_med := 'Keskmine'
+														b_high := 'Kõrge'
+														b_from := 'Kellelt'
+														b_to := 'Kellele'
+														b_day := 'Kuupäev'
+														b_time := 'Aeg'
+														b_afternoon := 'Peale lõunat (15.00)'
+														b_evening := 'Õhtul (18.00)'
+														b_night := 'Öösel (21.00)'
+														b_myself := 'Määra tagasihelistamine minule'
+														b_other := 'Muu'
+														b_transfer_ag := 'Suuna agendile'
+														b_transfer := 'Suuna kõne'
+														b_am := 'Automaatvastaja'
+														b_welcome := 'Tere hommikust/ päevast/ õhtust. Minu nimi on $(@login_info.fullName) ja ma helistan teile $(campaign.cp_company). Kas ma saan palun rääkida $(contact.ct_name) $(contact.ct_surname)?'
+														b_outcome := 'Vali tulem'
+														b_search_customer := 'Palun sisesta kontakti ees- ja perekonnanimi, aadrss või telefon'
+														b_select_customer := 'Vali kontakt'
+														b_desired_customer := 'Kas see on soovitud kontakt?'
+														b_comments := 'Kommentaarid'
+													}
+													else {
+														message 'Language unknown: using EN. \r\n'
+															'Set cp_language to ES, FR, IT, EN, DE, LT, NL, SV, DA, NO, ET or HU.'
+														b_redial := 'Redial'
+														b_record_call := 'Record call'
+														b_search_contact := 'Search contact'
+														b_back := 'Back'
+														b_set_callback := 'Set callback'
+														b_callback := 'Callback'
+														b_no_contact := 'No answer'
+														b_data_input := 'Data input'
+														b_sale := 'Sale'
+														b_no_sale := 'Refusal'
+														b_more_data := 'More data'
+														b_end := 'Finish'
+														b_clear := 'Clear'
+														b_search := 'Search'
+														b_close := 'Close'
+														b_refuse := 'Refuse'
+														b_load := 'Load'
+														b_phone := 'Telephone'
+														b_priority := 'Priority'
+														b_low := 'Low'
+														b_med := 'Medium'
+														b_high := 'High'
+														b_from := 'From'
+														b_to := 'To'
+														b_day := 'Date'
+														b_time := 'Time'
+														b_afternoon := 'Afternoon (3pm)'
+														b_evening := 'Evening (6pm)'
+														b_night := 'Night (21pm)'
+														b_myself := 'Reschedule to myself'
+														b_other := 'Other'
+														b_transfer_ag := 'Transfer to agent'
+														b_transfer := 'Transfer call'
+														b_am := 'Answering Machine'
+														b_welcome := 'Good morning/afternoon/evening. This is $(@login_info.fullName) from $(campaign.cp_company). Could I speak with $(contact.ct_name) $(contact.ct_surname), please?'
+														b_outcome := 'Please select an outcome'
+														b_search_customer := 'Please enter the contact name, surname, address or phone'
+														b_select_customer := 'Select a contact'
+														b_desired_customer := 'Is this the desired contact?'
+														b_comments := 'Comments'
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	on exit {}
+}
+
+node "DATA_INPUT" {
+	id 73
+	master "MASTER"
+	variables {}
+	cursors {}
+	push button {
+		size 180,30 at 545,590
+		label b_no_sale {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_min_outcome := campaign.cp_no_sale_min
+			v_max_outcome := campaign.cp_no_sale_max
+			v_sale := false
+			goto node 'SetCallType'
+		}
+		disabled if (campaign.cp_no_sale_min = '') or (campaign.cp_no_sale_max = '')
+	}
+	push button {
+		size 180,30 at 735,590
+		label b_sale {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_min_outcome := campaign.cp_sale_min
+			v_max_outcome := campaign.cp_sale_max
+			v_sale := true
+			goto node 'SetCallType'
+		}
+		disabled if (campaign.cp_sale_min = '') or (campaign.cp_sale_max = '')
+	}
+	on first enter {}
+	on enter {}
+	on exit {}
+}
+
+node "DataInput1" {
+	id 63
+	master "DATA_INPUT"
+	variables {}
+	cursors {}
+	input for contact_profile.homeStreet {
+		size 275,25 at 245,190
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 23
+		disabled if campaign.cp_address = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,195
+		label '$(campaign.cp_address)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact_profile.lastName {
+		size 275,25 at 245,155
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 22
+		disabled if campaign.cp_surname = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,160
+		label '$(campaign.cp_surname)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact_profile.firstName {
+		size 275,25 at 245,120
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 21
+		disabled if campaign.cp_name = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,125
+		label '$(campaign.cp_name)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact_profile.homeCity {
+		size 275,25 at 245,225
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 24
+		disabled if campaign.cp_cust1_text01 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,230
+		label '$(campaign.cp_cust1_text01)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact_profile.homePostalCode {
+		size 275,25 at 245,260
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 25
+		disabled if campaign.cp_cust1_text02 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,265
+		label '$(campaign.cp_cust1_text02)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_phone1 {
+		size 275,25 at 645,330
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 38
+		disabled if campaign.cp_phone1 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	input for contact.ct_phone2 {
+		size 275,25 at 645,365
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 39
+		disabled if campaign.cp_phone2 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	input for contact.ct_mobile2 {
+		size 275,25 at 645,435
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 40
+		disabled if campaign.cp_mobile2 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,20 at 530,440
+		label '$(campaign.cp_mobile2)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 110,20 at 530,370
+		label '$(campaign.cp_phone2)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 110,19 at 530,335
+		label '$(campaign.cp_phone1)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust1_text12 {
+		size 275,25 at 645,260
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 35
+		disabled if campaign.cp_cust1_text12 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 530,265
+		label '$(campaign.cp_cust1_text12)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 110,19 at 530,300
+		label '$(campaign.cp_cust1_text13)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust1_text13 {
+		size 275,25 at 645,295
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 36
+		disabled if campaign.cp_cust1_text13 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,405
+		label '$(campaign.cp_cust1_text06)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact_profile.otherPhone {
+		size 275,25 at 245,400
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 29
+		disabled if campaign.cp_cust1_text06 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	input for contact.ct_cust1_text07 {
+		size 275,25 at 245,435
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 30
+		disabled if campaign.cp_cust1_text07 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,440
+		label '$(campaign.cp_cust1_text07)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact_profile.businessPhone {
+		size 275,25 at 245,365
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 28
+		disabled if campaign.cp_cust1_text05 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,370
+		label '$(campaign.cp_cust1_text05)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 110,19 at 130,335
+		label '$(campaign.cp_cust1_text04)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact_profile.homePhone {
+		size 275,25 at 245,330
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 27
+		disabled if campaign.cp_cust1_text04 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	input for contact_profile.homeStateProvince {
+		size 275,25 at 245,295
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 26
+		disabled if campaign.cp_cust1_text03 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,300
+		label '$(campaign.cp_cust1_text03)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 110,19 at 530,125
+		label '$(campaign.cp_cust1_text08)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 110,19 at 530,160
+		label '$(campaign.cp_cust1_text09)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust1_text09 {
+		size 275,25 at 645,155
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 32
+		disabled if campaign.cp_cust1_text09 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	input for contact.ct_cust1_text10 {
+		size 275,25 at 645,190
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 33
+		disabled if campaign.cp_cust1_text10 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 530,195
+		label '$(campaign.cp_cust1_text10)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 110,19 at 530,230
+		label '$(campaign.cp_cust1_text11)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust1_text11 {
+		size 275,25 at 645,225
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 34
+		disabled if campaign.cp_cust1_text11 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	push button {
+		size 180,30 at 130,590
+		label b_more_data {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			if v_custom2_screen = true then {
+				goto node 'DataInput2'
+			}
+			else {
+				goto node 'DataInput3'
+			}
+		}
+		disabled if v_custom2_screen = false and v_custom3_screen = false
+	}
+	input for contact.ct_mobile1 {
+		size 275,25 at 645,400
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 40
+		disabled if campaign.cp_mobile1 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,20 at 530,405
+		label '$(campaign.cp_mobile1)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust1_text08 {
+		size 275,25 at 645,120
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 31
+		disabled if campaign.cp_cust1_text08 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	on first enter {
+		call recordCall()
+	}
+	on enter {}
+	on exit {}
+}
+
+node "SetCallType" {
+	id 65
+	master "MASTER"
+	variables {
+		l_call_type: text
+		l_name: text
+		l_description: text
+		l_call_type_id: text
+	}
+	cursors {}
+	on error phone extend
+		(
+		err: PhoneError,
+		user_name: text,
+		num: text
+		)
+	{
+		comment {UPGRADE WARNING: node event handler 'on progress extend': 'err' formal of type 'number' is now of type 'PhoneError'}
+		if @script_info.windowId = SESSION_WINDOW_ID then {}
+	}
+
+	push button {
+		size 180,30 at 735,590
+		label b_end {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			if gv_outcome_enum <> '' then {
+				comment {UPGRADE WARNING: action 'set call type': is now 'add to outcomes'; Suggestion: review if the assigned text value matches the new enumeration constant name defined in 'CallTypeValues' enumeration on server side}
+				call sub_SetOutcome(multiscript_outcomes::gv_outcome_enum)
+				comment {
+					add to outcomes
+					values
+					attribute call_type := l_name}
+				comment {
+					if v_sale = true and cp_cons_campaign <> '' then {
+					new contact campaign cp_cons_campaign
+					values
+					ct_name,
+					ct_surname,
+					ct_addr1,
+					ct_comments,
+					ct_phone1,
+					ct_phone2,
+					ct_mobile1,
+					ct_mobile2
+					phones
+					phone1 := phone1,
+					phone2 := phone2,
+					mobile1 := mobile1,
+					mobile2 := mobile2
+					}
+					else {}}
+				call Reschedule(gv_outcome_enum)
+				if (@phone_info.state = PhoneState::connected) then {
+					hang up phone
+				}
+				else {}
+				flow view element "__FLOW_ELEMENT_GENERATED#1" {
+					end script
+				}
+			}
+			else {
+				message 'Please select an outcome'
+			}
+		}
+	}
+	table for Call_Type {
+		size 670,245 at 200,170
+		font {
+			name "Arial"
+			size 10
+		}
+		columns 
+			 size 0, 
+			 size 250, 
+			 size 400
+		header font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on double click {
+			comment {UPGRADE WARNING: action 'fetch cursor': 'into' set must now specify the type of each item: assuming 'variable' type; Suggestion: please evaluate the usage of 'record' type instead, if target item variable is of record type}
+			fetch cursor Call_Type relative 0 into
+				variable gv_outcome_desc, variable gv_outcome_label, variable gv_outcome_enum
+			l_name := gv_outcome_label
+			l_description := gv_outcome_desc
+			gv_outcome.multiscript_call_type := multiscript_outcomes::gv_outcome_enum
+			if gv_outcome_label = 'Answering Machine' then {
+				comment {set business status to BusinessStatus::unsuccessful}
+				reschedule loaded contact with failed reason ContactFailedReason::machine
+			}
+			else {
+				if gv_outcome_label = 'No Answer' then {
+					reschedule loaded contact with failed reason ContactFailedReason::noAnswer
+				}
+				else {
+					if gv_outcome_label = 'Busy' then {
+						reschedule loaded contact with failed reason ContactFailedReason::busy
+					}
+					else {}
+				}
+			}
+		}
+		on selection change commit {}
+	}
+	static text {
+		size 635,20 at 165,130
+		background transparent
+		label b_outcome {
+			font {
+				name "Arial"
+				size 12
+				bold
+				color rgb 15,137,210
+			}
+		}
+	}
+	push button {
+		size 110,30 at 10,255
+		label b_transfer_ag {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			if v_doRecording then {
+				call stop_recording()
+			}
+			else {}
+			extend phone for transfer to extension campaign.cp_transfer
+			v_transfering := true
+			v_doTransfer := true
+		}
+		disabled if (campaign.cp_transfer = '') or (v_transfering = true) or (@login_info.extension = '')
+	}
+	push button {
+		size 110,30 at 10,300
+		label b_transfer {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			transfer phone
+		}
+		disabled if (campaign.cp_transfer = '') or (v_readyToTransfer = false)
+	}
+	static text {
+		size 670,30 at 200,430
+		label '$(l_name): $(l_description)' {
+			font {
+				name "Arial"
+				size 10
+				bold
+				color rgb 15,137,210
+			}
+			center
+		}
+	}
+	on first enter {}
+	on enter {
+		l_call_type := ''
+		l_name := ''
+		l_description := ''
+		open cursor Call_Type
+	}
+	on exit {
+		close cursor Call_Type
+	}
+}
+
+node "SearchContact" {
+	id 66
+	master "MASTER"
+	variables {
+		search_enabled: boolean
+	}
+	cursors {}
+	input for v_search_name {
+		size 260,25 at 395,220
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {
+			if Trim(v_search_name) = '' and Trim(v_search_surname) = '' and Trim(v_search_address) = '' and Trim(v_search_phone) = '' and Trim(v_search_easycode) = '' then {
+				search_enabled := false
+			}
+			else {
+				search_enabled := true
+			}
+		}
+	}
+	input for v_search_address {
+		size 260,25 at 395,300
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {
+			if Trim(v_search_name) = '' and Trim(v_search_surname) = '' and Trim(v_search_address) = '' and Trim(v_search_phone) = '' and Trim(v_search_easycode) = '' then {
+				search_enabled := false
+			}
+			else {
+				search_enabled := true
+			}
+		}
+	}
+	input for v_search_surname {
+		size 260,25 at 395,260
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {
+			if Trim(v_search_name) = '' and Trim(v_search_surname) = '' and Trim(v_search_address) = '' and Trim(v_search_phone) = '' and Trim(v_search_easycode) = '' then {
+				search_enabled := false
+			}
+			else {
+				search_enabled := true
+			}
+		}
+	}
+	static text {
+		size 135,20 at 255,225
+		label '$(campaign.cp_name):' {
+			font {
+				name "Arial"
+				size 9
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 135,20 at 255,265
+		label '$(campaign.cp_surname):' {
+			font {
+				name "Arial"
+				size 9
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 135,20 at 255,305
+		label '$(campaign.cp_address):' {
+			font {
+				name "Arial"
+				size 9
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for v_search_phone {
+		size 260,25 at 395,340
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {
+			if Trim(v_search_name) = '' and Trim(v_search_surname) = '' and Trim(v_search_address) = '' and Trim(v_search_phone) = '' and Trim(v_search_easycode) = '' then {
+				search_enabled := false
+			}
+			else {
+				search_enabled := true
+			}
+		}
+	}
+	static text {
+		size 135,20 at 255,345
+		label '$(campaign.cp_phone1):' {
+			font {
+				name "Arial"
+				size 9
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	push button {
+		size 180,30 at 545,590
+		label b_clear {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_search_name := ''
+			v_search_surname := ''
+			v_search_address := ''
+			v_search_phone := ''
+			search_enabled := false
+		}
+	}
+	push button {
+		size 180,30 at 735,590
+		label b_search {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			if v_search_easycode <> '' then {
+				v_search_condition := ' and uniqueId=\'$(v_search_easycode)\''
+			}
+			else {}
+			if v_search_name <> '' then {
+				v_search_condition := ' and firstName like \'%$(v_search_name)%\''
+			}
+			else {}
+			if v_search_surname <> '' then {
+				v_search_condition := ' and lastName like \'%$(v_search_surname)%\''
+			}
+			else {}
+			if v_search_address <> '' then {
+				v_search_condition := ' and homeStreet like \'%$(v_search_address)%\''
+			}
+			else {}
+			if v_search_phone <> '' then {
+				v_search_condition := ' and homePhone like \'%$(v_search_phone)%\''
+			}
+			else {}
+			comment {
+				(ct_name like '%@(v_search_name)%' or ct_name is null )
+				AND (ct_surname like '%@(v_search_surname)%' or ct_surname is null)
+				AND (ct_address like '%@(v_search_address)%' or ct_address is null)
+				AND (ct_phone1 like '%@(v_search_phone)%' or ct_phone1 is null)}
+			goto node 'LoadContact'
+		}
+		disabled if not search_enabled
+	}
+	static text {
+		size 555,30 at 250,180
+		label b_search_customer {
+			font {
+				name "Arial"
+				size 12
+				bold
+				color rgb 15,137,210
+			}
+		}
+	}
+	static text {
+		size 135,20 at 255,385
+		label 'Unique ID' {
+			font {
+				name "Arial"
+				size 9
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for v_search_easycode {
+		size 260,25 at 395,380
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {
+			if Trim(v_search_name) = '' and Trim(v_search_surname) = '' and Trim(v_search_address) = '' and Trim(v_search_phone) = '' and Trim(v_search_easycode) = '' then {
+				search_enabled := false
+			}
+			else {
+				search_enabled := true
+			}
+		}
+	}
+	on first enter {}
+	on enter {
+		if v_search_name = '' and v_search_surname = '' and v_search_address = '' and v_search_phone = '' then {
+			search_enabled := false
+		}
+		else {
+			search_enabled := true
+		}
+	}
+	on exit {}
+}
+
+node "Arg1" {
+	id 67
+
+	variables {}
+	cursors {}
+	web browser {
+		size 625,735 at 10,15
+		background transparent
+		initial url '$(campaign.cp_arg1_url)'
+		toolbar hidden if true
+	}
+	push button {
+		size 105,30 at 535,760
+		label b_close {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			gn_id_win1 := 0
+			close window
+		}
+	}
+	on first enter {}
+	on enter {}
+	on exit {}
+}
+
+node "Arg2" {
+	id 68
+
+	variables {}
+	cursors {}
+	web browser {
+		size 625,735 at 10,15
+		background transparent
+		initial url '$(campaign.cp_arg2_url)'
+		toolbar hidden if true
+	}
+	push button {
+		size 105,30 at 535,760
+		label b_close {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			gn_id_win2 := 0
+			close window
+		}
+	}
+	on first enter {}
+	on enter {}
+	on exit {}
+}
+
+node "Arg3" {
+	id 69
+
+	variables {}
+	cursors {}
+	web browser {
+		size 625,735 at 10,15
+		background transparent
+		initial url '$(campaign.cp_arg3_url)'
+		toolbar hidden if true
+	}
+	push button {
+		size 105,30 at 535,760
+		label b_close {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			gn_id_win3 := 0
+			close window
+		}
+	}
+	on first enter {}
+	on enter {}
+	on exit {}
+}
+
+node "LoadContact" {
+	id 70
+	master "MASTER"
+	variables {
+		l_name: text
+		l_surname: text
+		l_address: text
+		l_phone: text
+		l_easycode: text
+	}
+	cursors {}
+	push button {
+		size 180,30 at 545,590
+		label b_refuse {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			goto node 'Welcome'
+		}
+	}
+	push button {
+		size 180,30 at 735,590
+		label b_load {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			if v_alreadyLoaded = false then {
+				if Trim(l_easycode) <> '' then {
+					load contact with contact profile unique id l_easycode from directory @script_session_info.directory
+					comment {The value of ct_contact_date is reset with the time when the current call started.}
+					contact.ct_contact_date := gv_contact_date
+					contact.ct_dnis := gv_dnis
+					contact.ct_agent := gv_agent
+					goto node "DataInput1"
+					v_alreadyLoaded := true
+				}
+				else {
+					message 'No customer selected'
+				}
+			}
+			else {
+				message 'You already loaded a customer'
+			}
+		}
+		disabled if l_name = '' and l_surname = '' and l_address = '' and l_phone = ''
+	}
+	table for cur_cttable {
+		size 680,145 at 190,150
+		font {
+			name "Arial"
+			size 10
+		}
+		columns 
+			 size 0, 
+			 size 120, 
+			 size 180, 
+			 size 250, 
+			 size 110
+		header font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on double click {}
+		on selection change commit {
+			l_name := ''
+			l_surname := ''
+			l_address := ''
+			l_easycode := ''
+			l_phone := ''
+			comment {UPGRADE WARNING: action 'fetch cursor': 'into' set must now specify the type of each item: assuming 'variable' type; Suggestion: please evaluate the usage of 'record' type instead, if target item variable is of record type}
+			fetch cursor cur_cttable relative 0 into
+				variable l_easycode, variable l_name, variable l_surname, variable l_address, variable l_phone
+		}
+	}
+	static text {
+		size 600,20 at 175,315
+		background transparent
+		label b_desired_customer {
+			font {
+				name "Arial"
+				size 12
+				bold
+				color rgb 15,137,210
+			}
+		}
+	}
+	input for l_name {
+		size 260,25 at 440,329
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus {}
+		read only if true
+	}
+	static text {
+		size 135,20 at 300,334
+		label '$(campaign.cp_name):' {
+			font {
+				name "Arial"
+				size 9
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 135,20 at 300,369
+		label '$(campaign.cp_surname):' {
+			font {
+				name "Arial"
+				size 9
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for l_surname {
+		size 260,25 at 440,364
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus {}
+		read only if true
+	}
+	input for l_address {
+		size 260,25 at 440,399
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus {}
+		read only if true
+	}
+	static text {
+		size 135,20 at 300,404
+		label '$(campaign.cp_address):' {
+			font {
+				name "Arial"
+				size 9
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 135,20 at 300,439
+		label '$(campaign.cp_phone1):' {
+			font {
+				name "Arial"
+				size 9
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for l_phone {
+		size 260,25 at 440,434
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus {}
+		read only if true
+	}
+	static text {
+		size 620,20 at 170,125
+		background transparent
+		label b_select_customer {
+			font {
+				name "Arial"
+				size 12
+				bold
+				color rgb 15,137,210
+			}
+		}
+	}
+	static text {
+		size 135,20 at 300,475
+		label 'Easycode:' {
+			font {
+				name "Arial"
+				size 9
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for l_easycode {
+		size 260,25 at 440,470
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus {}
+		read only if true
+	}
+	on first enter {}
+	on enter {
+		close cursor cur_cttable
+		open cursor cur_cttable
+	}
+	on exit {
+		close cursor cur_cttable
+	}
+}
+
+node "DataInput2" {
+	id 71
+	master "DATA_INPUT"
+	variables {}
+	cursors {}
+	static text {
+		size 110,19 at 130,195
+		label '$(campaign.cp_cust2_text03)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 110,19 at 130,160
+		label '$(campaign.cp_cust2_text02)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 110,19 at 130,125
+		label '$(campaign.cp_cust2_text01)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 110,19 at 130,230
+		label '$(campaign.cp_cust2_text04)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust2_text05 {
+		size 275,25 at 245,260
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 25
+		disabled if campaign.cp_cust2_text05 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,265
+		label '$(campaign.cp_cust2_text05)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust2_text18 {
+		size 275,25 at 645,365
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 38
+		disabled if campaign.cp_cust2_text18 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	input for contact.ct_cust2_text19 {
+		size 275,25 at 645,400
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 39
+		disabled if campaign.cp_cust2_text19 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	input for contact.ct_cust2_text20 {
+		size 275,25 at 645,435
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 40
+		disabled if campaign.cp_cust2_text20 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 115,20 at 525,440
+		label '$(campaign.cp_cust2_text20)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 115,20 at 525,405
+		label '$(campaign.cp_cust2_text19)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 115,19 at 525,370
+		label '$(campaign.cp_cust2_text18)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust2_text15 {
+		size 275,25 at 645,260
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 35
+		disabled if campaign.cp_cust2_text15 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 115,19 at 525,265
+		label '$(campaign.cp_cust2_text15)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 115,19 at 525,300
+		label '$(campaign.cp_cust2_text16)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust2_text16 {
+		size 275,25 at 645,295
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 36
+		disabled if campaign.cp_cust2_text16 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 115,19 at 525,335
+		label '$(campaign.cp_cust2_text17)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust2_text17 {
+		size 275,25 at 645,330
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 37
+		disabled if campaign.cp_cust2_text17 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,405
+		label '$(campaign.cp_cust2_text09)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust2_text09 {
+		size 275,25 at 245,400
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 29
+		disabled if campaign.cp_cust2_text09 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	input for contact.ct_cust2_text10 {
+		size 275,25 at 245,435
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 30
+		disabled if campaign.cp_cust2_text10 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,440
+		label '$(campaign.cp_cust2_text10)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust2_text08 {
+		size 275,25 at 245,365
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 28
+		disabled if campaign.cp_cust2_text08 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,370
+		label '$(campaign.cp_cust2_text08)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 110,19 at 130,335
+		label '$(campaign.cp_cust2_text07)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust2_text07 {
+		size 275,25 at 245,330
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 27
+		disabled if campaign.cp_cust2_text07 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,300
+		label '$(campaign.cp_cust2_text06)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust2_text11 {
+		size 275,25 at 645,120
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 31
+		disabled if campaign.cp_cust2_text11 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 115,19 at 525,125
+		label '$(campaign.cp_cust2_text11)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 115,19 at 525,160
+		label '$(campaign.cp_cust2_text12)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust2_text12 {
+		size 275,25 at 645,155
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 32
+		disabled if campaign.cp_cust2_text12 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	input for contact.ct_cust2_text13 {
+		size 275,25 at 645,190
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 33
+		disabled if campaign.cp_cust2_text13 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 115,19 at 525,195
+		label '$(campaign.cp_cust2_text13)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 115,19 at 525,230
+		label '$(campaign.cp_cust2_text14)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust2_text14 {
+		size 275,25 at 645,225
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 34
+		disabled if campaign.cp_cust2_text14 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	push button {
+		size 180,30 at 130,590
+		label b_more_data {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			goto node 'DataInput3'
+		}
+		disabled if v_custom3_screen = false
+	}
+	input for contact.ct_cust2_text06 {
+		size 275,25 at 245,295
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 26
+		disabled if campaign.cp_cust2_text06 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	input for contact.ct_cust2_text04 {
+		size 275,25 at 245,225
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 24
+		disabled if campaign.cp_cust2_text04 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	input for contact.ct_cust2_text03 {
+		size 275,25 at 245,190
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 23
+		disabled if campaign.cp_cust2_text03 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	input for contact.ct_cust2_text02 {
+		size 275,25 at 245,155
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 22
+		disabled if campaign.cp_cust2_text02 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	input for contact.ct_cust2_text01 {
+		size 275,25 at 245,120
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 21
+		disabled if campaign.cp_cust2_text01 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	on first enter {}
+	on enter {}
+	on exit {}
+}
+
+node "DataInput3" {
+	id 72
+	master "DATA_INPUT"
+	variables {}
+	cursors {}
+	input for contact.ct_cust3_text03 {
+		size 275,25 at 245,190
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 23
+		disabled if campaign.cp_cust3_text03 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,195
+		label '$(campaign.cp_cust3_text03)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust3_text02 {
+		size 275,25 at 245,155
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 22
+		disabled if campaign.cp_cust3_text02 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,160
+		label '$(campaign.cp_cust3_text02)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust3_text01 {
+		size 275,25 at 245,120
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 21
+		disabled if campaign.cp_cust3_text01 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,125
+		label '$(campaign.cp_cust3_text01)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust3_text04 {
+		size 275,25 at 245,225
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 24
+		disabled if campaign.cp_cust3_text04 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,230
+		label '$(campaign.cp_cust3_text04)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust3_text05 {
+		size 275,25 at 245,260
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 25
+		disabled if campaign.cp_cust3_text05 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,265
+		label '$(campaign.cp_cust3_text05)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust3_text18 {
+		size 275,25 at 645,365
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 38
+		disabled if campaign.cp_cust3_text18 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	input for contact.ct_cust3_text19 {
+		size 275,25 at 645,400
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 39
+		disabled if campaign.cp_cust3_text19 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	input for contact.ct_cust3_text20 {
+		size 275,25 at 645,435
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 40
+		disabled if campaign.cp_cust3_text20 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 115,20 at 525,440
+		label '$(campaign.cp_cust3_text20)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 115,20 at 525,405
+		label '$(campaign.cp_cust3_text19)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 115,19 at 525,370
+		label '$(campaign.cp_cust3_text18)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust3_text15 {
+		size 275,25 at 645,260
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 35
+		disabled if campaign.cp_cust3_text15 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 115,19 at 525,265
+		label '$(campaign.cp_cust3_text15)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 115,19 at 525,300
+		label '$(campaign.cp_cust3_text16)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust3_text16 {
+		size 275,25 at 645,295
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 36
+		disabled if campaign.cp_cust3_text16 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 115,19 at 525,335
+		label '$(campaign.cp_cust3_text17)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust3_text17 {
+		size 275,25 at 645,330
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 37
+		disabled if campaign.cp_cust3_text17 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,405
+		label '$(campaign.cp_cust3_text09)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust3_text09 {
+		size 275,25 at 245,400
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 29
+		disabled if campaign.cp_cust3_text09 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	input for contact.ct_cust3_text10 {
+		size 275,25 at 245,435
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 30
+		disabled if campaign.cp_cust3_text10 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,440
+		label '$(campaign.cp_cust3_text10)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust3_text08 {
+		size 275,25 at 245,365
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 28
+		disabled if campaign.cp_cust3_text08 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,370
+		label '$(campaign.cp_cust3_text08)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 110,19 at 130,335
+		label '$(campaign.cp_cust3_text07)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust3_text07 {
+		size 275,25 at 245,330
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 27
+		disabled if campaign.cp_cust3_text07 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	input for contact.ct_cust3_text06 {
+		size 275,25 at 245,295
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 26
+		disabled if campaign.cp_cust3_text06 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 110,19 at 130,300
+		label '$(campaign.cp_cust3_text06)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust3_text11 {
+		size 275,25 at 645,120
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 31
+		disabled if campaign.cp_cust3_text11 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 115,19 at 525,125
+		label '$(campaign.cp_cust3_text11)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 115,19 at 525,160
+		label '$(campaign.cp_cust3_text12)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust3_text12 {
+		size 275,25 at 645,155
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 32
+		disabled if campaign.cp_cust3_text12 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	input for contact.ct_cust3_text13 {
+		size 275,25 at 645,190
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 33
+		disabled if campaign.cp_cust3_text13 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	static text {
+		size 115,19 at 525,195
+		label '$(campaign.cp_cust3_text13)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 115,19 at 525,230
+		label '$(campaign.cp_cust3_text14)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for contact.ct_cust3_text14 {
+		size 275,25 at 645,225
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus commit {}
+		tab order 34
+		disabled if campaign.cp_cust3_text14 = ''
+		read only if campaign.cp_editable_fields <> 1
+	}
+	on first enter {}
+	on enter {}
+	on exit {}
+}
+
+node "Callback" {
+	id 9
+	master "MASTER"
+	variables {
+		v_hour_cto: time
+			comment {v_hora_cto: time}
+		v_priority: number
+			comment {v_prioridad: number}
+		v_telephone_cto: text
+			comment {v_telefono_cto: text}
+		v_telephone_number: text(20)
+			comment {v_numero_telefono: text(20)}
+		v_working_minutes: number
+			comment {v_working_minutes: number}
+		v_year_cto: text
+			comment {*new variable > holds current year to current year + 5}
+		v_month_cto: text
+			comment {*new variable > holds monthname}
+	}
+	cursors {
+		cur_startYR: memory for Split(StartFromCurrentYR(year(now()), 10), ',')
+	}
+	static box {
+		size 515,323 at 398,147
+		label '' {
+			font {
+				name "Arial"
+				size 14
+				bold
+				underline
+				color "Purple"
+			}
+			center
+		}
+		border etched
+	}
+	static box {
+		size 237,323 at 159,147
+		label '' {}
+		border etched
+	}
+	static box {
+		size 231,199 at 162,222
+		background color "White"
+		label '' {}
+		border etched
+	}
+	static text {
+		size 140,19 at 414,398
+		label b_priority {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+		}
+	}
+	radio button for v_priority {
+		size 96,20 at 438,425
+		label b_low {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		checked if 1
+		on click commit {}
+		tab order 9
+	}
+	radio button for v_priority {
+		size 105,20 at 576,426
+		label b_med {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		checked if 5
+		on click {}
+		tab order 9
+	}
+	radio button for v_priority {
+		size 105,20 at 719,426
+		label b_high {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		checked if 10
+		on click {}
+		tab order 9
+	}
+	static text {
+		size 40,17 at 403,192
+		label b_day {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 48,48,48
+			}
+			align right
+		}
+	}
+	input for v_date_cto {
+		size 80,25 at 448,186
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus {}
+		center
+		tab order 1
+	}
+	text button {
+		size 18,16 at 529,182
+		label 't' {
+			font {
+				name "Marlett"
+				size 14
+				color "Purple"
+			}
+			center
+		}
+		on click commit {
+			var v_nmes: number := month(v_date_cto)
+			if (v_date_cto + 1) <= v_calend_date_to then {
+				v_date_cto := v_date_cto + 1
+				if v_nmes < month(v_date_cto) then {
+					v_calend_month := month(v_date_cto)
+					v_calend_day := day(v_date_cto)
+					v_calend_year := year(v_date_cto)
+					call cambiar_nombre_dia(v_calend_month, v_calend_day, v_calend_year)
+					call cambiar_mes(v_calend_month, v_calend_day, v_calend_year)
+				}
+				else {
+					v_calend_day := day(v_date_cto)
+					call selecc_fecha(v_calend_day)
+				}
+			}
+			else {}
+		}
+		tab order 2
+		disabled if v_date_cto >= v_calend_date_to
+	}
+	text button {
+		size 18,19 at 529,198
+		label 'u' {
+			font {
+				name "Marlett"
+				size 14
+				color "Purple"
+			}
+			center
+		}
+		on click commit {
+			var v_nmes: number := month(v_date_cto)
+			v_date_cto := v_date_cto - 1
+			if v_nmes >= month(v_date_cto) then {
+				v_calend_month := month(v_date_cto)
+				v_calend_day := day(v_date_cto)
+				v_calend_year := year(v_date_cto)
+				call cambiar_mes(v_calend_month, v_calend_day, v_calend_year)
+				call cambiar_nombre_dia(v_calend_month, v_calend_day, v_calend_year)
+			}
+			else {
+				v_calend_day := day(v_date_cto)
+				call selecc_fecha(v_calend_day)
+			}
+		}
+		tab order 2
+		disabled if v_date_cto <= v_calend_date_from
+	}
+	text button {
+		size 20,21 at 548,177
+		label 't' {
+			font {
+				name "Marlett"
+				size 18
+				color "Maroon"
+			}
+			center
+		}
+		on click commit {
+			var v_nmes: number := month(v_date_cto)
+			if (v_date_cto + 7) <= v_calend_date_to then {
+				v_date_cto := v_date_cto + 7
+				if v_nmes < month(v_date_cto) then {
+					v_calend_month := month(v_date_cto)
+					v_calend_day := day(v_date_cto)
+					v_calend_year := year(v_date_cto)
+					call cambiar_nombre_dia(v_calend_month, v_calend_day, v_calend_year)
+					call cambiar_mes(v_calend_month, v_calend_day, v_calend_year)
+				}
+				else {
+					v_calend_day := day(v_date_cto)
+					call selecc_fecha(v_calend_day)
+				}
+			}
+			else {}
+		}
+		tab order 3
+		disabled if v_date_cto >= v_calend_date_to
+	}
+	text button {
+		size 21,21 at 547,198
+		label 'u' {
+			font {
+				name "Marlett"
+				size 18
+				color "Maroon"
+			}
+			center
+		}
+		on click commit {
+			var v_nmes: number := month(v_date_cto)
+			v_date_cto := v_date_cto - 7
+			if v_nmes >= month(v_date_cto) then {
+				v_calend_month := month(v_date_cto)
+				v_calend_day := day(v_date_cto)
+				v_calend_year := year(v_date_cto)
+				call cambiar_nombre_dia(v_calend_month, v_calend_day, v_calend_year)
+				call cambiar_mes(v_calend_month, v_calend_day, v_calend_year)
+			}
+			else {
+				v_calend_day := day(v_date_cto)
+				call selecc_fecha(v_calend_day)
+			}
+		}
+		tab order 3
+		disabled if v_date_cto <= v_calend_date_from
+	}
+	static text {
+		size 55,17 at 568,192
+		label b_time {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	input for v_hour_cto {
+		size 80,25 at 628,186
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus {}
+		center
+		tab order 4
+	}
+	text button {
+		size 18,15 at 709,183
+		label 't' {
+			font {
+				name "Marlett"
+				size 14
+				color "Purple"
+			}
+			center
+		}
+		on click commit {
+			v_hour_cto := v_hour_cto + 1
+			v_calend_hour_cto := v_hour_cto
+			v_calend_date_complete := '$(v_calend_day_week), $(v_calend_day)th $(v_calend_name_month) $(v_calend_year), $(v_calend_hour_cto)h'
+		}
+		tab order 5
+	}
+	text button {
+		size 18,16 at 709,198
+		label 'u' {
+			font {
+				name "Marlett"
+				size 14
+				color "Purple"
+			}
+			center
+		}
+		on click commit {
+			var m_hour: number := hour(v_hour_cto)
+			var m_minute: number := minute(v_hour_cto)
+			if m_minute - 1 < 0 then {
+				m_minute := 59
+				if m_hour - 1 < 0 then {
+					m_hour := 23
+				}
+				else {
+					m_hour := m_hour - 1
+				}
+			}
+			else {
+				m_minute := m_minute - 1
+			}
+			v_hour_cto := time(m_hour, m_minute)
+			v_calend_hour_cto := v_hour_cto
+			v_calend_date_complete := '$(v_calend_day_week), $(v_calend_day)th $(v_calend_name_month) $(v_calend_year), $(v_calend_hour_cto)h'
+		}
+		tab order 5
+	}
+	text button {
+		size 21,21 at 727,198
+		label 'u' {
+			font {
+				name "Marlett"
+				size 18
+				color "Maroon"
+			}
+			center
+		}
+		on click commit {
+			var m_hour: number := hour(v_hour_cto)
+			var m_minute: number := minute(v_hour_cto)
+			if m_hour - 1 < 0 then {
+				m_hour := 23
+			}
+			else {
+				m_hour := m_hour - 1
+			}
+			v_hour_cto := time(m_hour, m_minute)
+			v_calend_hour_cto := v_hour_cto
+			v_calend_date_complete := '$(v_calend_day_week), $(v_calend_day)th $(v_calend_name_month) $(v_calend_year), $(v_calend_hour_cto)h'
+		}
+		tab order 6
+	}
+	input for v_telephone_number {
+		size 115,25 at 528,347
+		font {
+			name "Arial"
+			size 10
+			bold
+		}
+		on lose focus {}
+		tab order 8
+		disabled if v_telephone_cto <> 'Different'
+	}
+	text button {
+		size 21,21 at 727,177
+		label 't' {
+			font {
+				name "Marlett"
+				size 18
+				color "Maroon"
+			}
+			center
+		}
+		on click commit {
+			v_hour_cto := v_hour_cto + 60
+			v_calend_hour_cto := v_hour_cto
+			v_calend_date_complete := '$(v_calend_day_week), $(v_calend_day)th $(v_calend_name_month) $(v_calend_year), $(v_calend_hour_cto)h'
+		}
+		tab order 6
+	}
+	push button {
+		size 42,25 at 165,156
+		background color rgb 140,198,255
+		label '33' {
+			font {
+				name "Marlett"
+				size 12
+				bold
+				color rgb 48,48,48
+			}
+		}
+		on click commit {
+			if v_calend_month = 1 then {
+				v_calend_month := 12
+				v_calend_year := v_calend_year - 1
+			}
+			else {
+				v_calend_month := v_calend_month - 1
+			}
+			if v_calend_month = month(today()) and v_calend_year = year(today()) then {
+				v_calend_day := day(today())
+			}
+			else {
+				v_calend_day := 1
+			}
+			v_month_cto := GetMonthName(v_calend_month)
+			v_year_cto := v_calend_year
+			case week_day(date(v_calend_year, v_calend_month, v_calend_day)) {
+				when 'sabado' do {
+					v_calend_day := 3
+				}
+				when 'domingo' do {
+					v_calend_day := 2
+				}
+				default {}
+			}
+			call cambiar_mes(v_calend_month, v_calend_day, v_calend_year)
+			v_date_cto := date(v_calend_year, v_calend_month, v_calend_day)
+		}
+		flat
+		tab order 10
+		disabled if date(v_calend_year, v_calend_month, 1) <= v_calend_date_from
+	}
+	push button {
+		size 42,25 at 347,156
+		background color rgb 140,198,255
+		label '44' {
+			font {
+				name "Marlett"
+				size 12
+				bold
+				color rgb 48,48,48
+			}
+		}
+		on click commit {
+			if v_calend_month < 12 then {
+				v_calend_month := v_calend_month + 1
+			}
+			else {
+				v_calend_month := 1
+				v_calend_year := v_calend_year + 1
+			}
+			v_month_cto := GetMonthName(v_calend_month)
+			v_year_cto := v_calend_year
+			v_calend_day := 1
+			case week_day(date(v_calend_year, v_calend_month, v_calend_day)) {
+				when 'sabado' do {
+					v_calend_day := 3
+				}
+				when 'domingo' do {
+					v_calend_day := 2
+				}
+				default {
+					v_calend_day := 1
+				}
+			}
+			call cambiar_mes(v_calend_month, v_calend_day, v_calend_year)
+			v_date_cto := date(v_calend_year, v_calend_month, v_calend_day)
+		}
+		flat
+		tab order 10
+		disabled if v_calend_month = month(v_calend_date_to) and v_calend_year = year(v_calend_date_to)
+	}
+	push button {
+		size 30,27 at 167,253
+		label '$(v_calend_tabla_days[1])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[1]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 11
+		disabled if (v_calend_tabla_days_status[1] = false)
+	}
+	push button {
+		size 30,27 at 197,253
+		label '$(v_calend_tabla_days[2])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[2]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 11
+		disabled if (v_calend_tabla_days_status[2] = false)
+	}
+	push button {
+		size 30,27 at 227,253
+		label '$(v_calend_tabla_days[3])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[3]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 11
+		disabled if (v_calend_tabla_days_status[3] = false)
+	}
+	push button {
+		size 30,27 at 257,253
+		label '$(v_calend_tabla_days[4])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[4]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 11
+		disabled if (v_calend_tabla_days_status[4] = false)
+	}
+	push button {
+		size 30,27 at 287,253
+		label '$(v_calend_tabla_days[5])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[5]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 11
+		disabled if (v_calend_tabla_days_status[5] = false)
+	}
+	push button {
+		size 30,27 at 167,280
+		label '$(v_calend_tabla_days[8])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[8]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 12
+		disabled if (v_calend_tabla_days_status[8] = false)
+	}
+	push button {
+		size 30,27 at 197,280
+		label '$(v_calend_tabla_days[9])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[9]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 12
+		disabled if (v_calend_tabla_days_status[9] = false)
+	}
+	push button {
+		size 30,27 at 227,280
+		label '$(v_calend_tabla_days[10])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[10]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 12
+		disabled if (v_calend_tabla_days_status[10] = false)
+	}
+	push button {
+		size 30,27 at 257,280
+		label '$(v_calend_tabla_days[11])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[11]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 12
+		disabled if (v_calend_tabla_days_status[11] = false)
+	}
+	push button {
+		size 30,27 at 287,280
+		label '$(v_calend_tabla_days[12])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[12]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 12
+		disabled if (v_calend_tabla_days_status[12] = false)
+	}
+	push button {
+		size 30,27 at 167,307
+		label '$(v_calend_tabla_days[15])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[15]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 13
+		disabled if (v_calend_tabla_days_status[15] = false)
+	}
+	push button {
+		size 30,27 at 197,307
+		label '$(v_calend_tabla_days[16])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[16]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 13
+		disabled if (v_calend_tabla_days_status[16] = false)
+	}
+	push button {
+		size 30,27 at 227,307
+		label '$(v_calend_tabla_days[17])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[17]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 13
+		disabled if (v_calend_tabla_days_status[17] = false)
+	}
+	push button {
+		size 30,27 at 257,307
+		label '$(v_calend_tabla_days[18])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[18]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 13
+		disabled if (v_calend_tabla_days_status[18] = false)
+	}
+	push button {
+		size 30,27 at 287,307
+		label '$(v_calend_tabla_days[19])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[19]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 13
+		disabled if (v_calend_tabla_days_status[19] = false)
+	}
+	push button {
+		size 30,27 at 167,334
+		label '$(v_calend_tabla_days[22])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[22]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 14
+		disabled if (v_calend_tabla_days_status[22] = false)
+	}
+	push button {
+		size 30,27 at 197,334
+		label '$(v_calend_tabla_days[23])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[23]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 14
+		disabled if (v_calend_tabla_days_status[23] = false)
+	}
+	push button {
+		size 30,27 at 227,334
+		label '$(v_calend_tabla_days[24])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[24]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 14
+		disabled if (v_calend_tabla_days_status[24] = false)
+	}
+	push button {
+		size 30,27 at 257,334
+		label '$(v_calend_tabla_days[25])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[25]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 14
+		disabled if (v_calend_tabla_days_status[25] = false)
+	}
+	push button {
+		size 30,27 at 287,334
+		label '$(v_calend_tabla_days[26])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[26]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 14
+		disabled if (v_calend_tabla_days_status[26] = false)
+	}
+	push button {
+		size 30,27 at 167,361
+		label '$(v_calend_tabla_days[29])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[29]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 15
+		disabled if (v_calend_tabla_days_status[29] = false)
+	}
+	push button {
+		size 30,27 at 197,361
+		label '$(v_calend_tabla_days[30])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[30]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 15
+		disabled if (v_calend_tabla_days_status[30] = false)
+	}
+	push button {
+		size 30,27 at 227,361
+		label '$(v_calend_tabla_days[31])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[31]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 15
+		disabled if (v_calend_tabla_days_status[31] = false)
+	}
+	push button {
+		size 30,27 at 257,361
+		label '$(v_calend_tabla_days[32])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[32]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 15
+		disabled if (v_calend_tabla_days_status[32] = false)
+	}
+	push button {
+		size 30,27 at 287,361
+		label '$(v_calend_tabla_days[33])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[33]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 15
+		disabled if (v_calend_tabla_days_status[33] = false)
+	}
+	push button {
+		size 30,27 at 167,388
+		label '$(v_calend_tabla_days[36])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[36]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 16
+		disabled if (v_calend_tabla_days_status[36] = false)
+	}
+	push button {
+		size 30,27 at 197,388
+		label '$(v_calend_tabla_days[37])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[37]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 16
+		disabled if (v_calend_tabla_days_status[37] = false)
+	}
+	check box for v_agent {
+		size 220,20 at 668,349
+		background transparent
+		label b_myself {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		checked if @login_info.name
+		unchecked if ''
+		on click commit {}
+		tab order 8
+	}
+	radio button for v_hour_cto {
+		size 150,20 at 758,172
+		label b_afternoon {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		checked if time(15, 00)
+		on click commit {
+			v_calend_hour_cto := v_hour_cto
+			v_calend_date_complete := '$(v_calend_day_week), $(v_calend_day)th $(v_calend_name_month) $(v_calend_year), $(v_calend_hour_cto)h'
+		}
+		tab order 7
+	}
+	radio button for v_hour_cto {
+		size 150,17 at 758,192
+		label b_evening {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		checked if time(18, 00)
+		on click commit {
+			v_calend_hour_cto := v_hour_cto
+			v_calend_date_complete := '$(v_calend_day_week), $(v_calend_day)th $(v_calend_name_month) $(v_calend_year), $(v_calend_hour_cto)h'
+		}
+		tab order 7
+	}
+	radio button for v_hour_cto {
+		size 150,17 at 758,210
+		label b_night {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		checked if time(21, 00)
+		on click commit {
+			v_calend_hour_cto := v_hour_cto
+			v_calend_date_complete := '$(v_calend_day_week), $(v_calend_day)th $(v_calend_name_month) $(v_calend_year), $(v_calend_hour_cto)h'
+		}
+		tab order 7
+	}
+	push button {
+		size 180,30 at 735,590
+		label b_set_callback {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			if isValidPhoneNum(v_telephone_number) then {
+				var v_momento_rellamada: datetime := datetime(year(v_date_cto), month(v_date_cto), day(v_date_cto), hour(v_hour_cto), minute(v_hour_cto), 0)
+				if v_momento_rellamada < now() then {
+					message 'Recall moment cannot cannot be before current time. Recall date is $(v_momento_rellamada)'
+				}
+				else {
+					if campaign.cp_time_start = '' then {
+						message 'Error: cp_time_start value is not set.'
+					}
+					else {}
+					if campaign.cp_time_end = '' then {
+						message 'Error: cp_time_end value is not set.'
+					}
+					else {}
+					v_rest_time := v_hour_cto - campaign.cp_time_start
+					v_working_minutes := campaign.cp_time_end - campaign.cp_time_start
+					if v_rest_time < 0 or v_rest_time >= v_working_minutes then {
+						message 'Invalid callback moment: out of working schedule. Change time, please'
+					}
+					else {
+						if contact.ct_num_recalls = '' then {
+							contact.ct_num_recalls := 1
+						}
+						else {
+							contact.ct_num_recalls := contact.ct_num_recalls + 1
+						}
+						if (@phone_info.state = PhoneState::connected) = true then {
+							hang up phone
+						}
+						else {}
+						comment {UPGRADE WARNING: action 'sql select': 'into' set must now specify the type of each item: assuming 'variable' type; Suggestion: please evaluate the usage of 'record' type instead, if target item variable is of record type}
+						comment {UPGRADE WARNING: action 'set call type': is now 'add to outcomes'; Suggestion: review if the assigned text value matches the new enumeration constant name defined in 'CallTypeValues' enumeration on server side}
+						call sub_SetOutcome(campaign.cp_code_callback)
+						comment {UPGRADE WARNING: action 'new call': 'at' option (moment): in arithmetic operations with 'time' type, the numeric representation of time value is now in 'total seconds' instead of 'total minutes'}
+						reschedule loaded contact at v_date_cto, v_hour_cto agent v_agent outbound rule campaign.cp_dial_rule priority v_priority
+						if v_telephone_cto = 'Different' then {
+							contact.ct_phone_callback := v_telephone_number
+						}
+						else {
+							contact.ct_phone_callback := @phone_info.phone
+						}
+						end script
+					}
+				}
+			}
+			else {
+				message 'Wrong telephone number'
+			}
+		}
+		tab order 15
+	}
+	static text {
+		size 450,25 at 160,118
+		label b_callback {
+			font {
+				name "Arial"
+				size 12
+				bold
+				color rgb 15,137,210
+			}
+		}
+	}
+	radio button for v_telephone_cto {
+		size 140,20 at 438,322
+		background transparent
+		label @phone_info.phone {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		checked if 'Same'
+		on click commit {
+			v_telephone_number := text_extract(contact.ct_phone1, text_length(campaign.cp_prefix) + 1, text_length(contact.ct_phone1))
+		}
+	}
+	radio button for v_telephone_cto {
+		size 85,25 at 438,347
+		background transparent
+		label b_other {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		checked if 'Different'
+		on click commit {
+			v_telephone_number := text_extract(contact.ct_phone2, text_length(campaign.cp_prefix) + 1, text_length(contact.ct_phone2))
+		}
+	}
+	static box {
+		size 511,145 at 400,244
+		background color "White"
+		label '' {}
+	}
+	static text {
+		size 29,20 at 167,229
+		background transparent
+		label 'Mo' {
+			font {
+				name "Arial Narrow"
+				size 12
+				bold
+				underline
+				color "Navy"
+			}
+			center
+		}
+	}
+	static text {
+		size 29,20 at 196,229
+		background transparent
+		label 'Tu' {
+			font {
+				name "Arial Narrow"
+				size 12
+				bold
+				underline
+				color "Navy"
+			}
+			center
+		}
+	}
+	static text {
+		size 29,20 at 226,229
+		background transparent
+		label 'We' {
+			font {
+				name "Arial Narrow"
+				size 12
+				bold
+				underline
+				color "Navy"
+			}
+			center
+		}
+	}
+	static text {
+		size 29,20 at 256,229
+		background transparent
+		label 'Th' {
+			font {
+				name "Arial Narrow"
+				size 12
+				bold
+				underline
+				color "Navy"
+			}
+			center
+		}
+	}
+	static text {
+		size 29,20 at 285,229
+		background transparent
+		label 'Fr' {
+			font {
+				name "Arial Narrow"
+				size 12
+				bold
+				underline
+				color "Navy"
+			}
+			center
+		}
+	}
+	static box {
+		size 462,24 at 426,257
+		background color "Window Background"
+		label '$(v_calend_date_complete)' {
+			font {
+				name "Arial"
+				size 14
+				bold
+				color "Blue"
+			}
+			center
+		}
+		border sunken
+	}
+	push button {
+		size 15,24 at 407,257
+		background color rgb 140,198,255
+		label '4' {
+			font {
+				name "Marlett"
+				size 10
+				bold
+				color rgb 48,48,48
+			}
+		}
+		on click commit {
+			v_calend_month := month(v_date_cto)
+			v_calend_day := day(v_date_cto)
+			v_calend_year := year(v_date_cto)
+			call cambiar_nombre_dia(v_calend_month, v_calend_day, v_calend_year)
+			call cambiar_mes(v_calend_month, v_calend_day, v_calend_year)
+		}
+		flat
+		tab order 17
+	}
+	static text {
+		size 116,20 at 414,298
+		background transparent
+		label b_phone {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+		}
+	}
+	push button {
+		size 30,27 at 326,252
+		background color "Silver"
+		label '$(v_calend_tabla_days[6])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[6]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 11
+		disabled if (v_calend_fiesta = true) or (v_calend_tabla_days_status[6] = false)
+	}
+	push button {
+		size 30,27 at 356,252
+		background color "Silver"
+		label '$(v_calend_tabla_days[7])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[7]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 11
+		disabled if (v_calend_fiesta = true) or (v_calend_tabla_days_status[7] = false)
+	}
+	push button {
+		size 30,27 at 326,279
+		background color "Silver"
+		label '$(v_calend_tabla_days[13])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[13]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 12
+		disabled if (v_calend_fiesta = true) or (v_calend_tabla_days_status[13] = false)
+	}
+	push button {
+		size 30,27 at 356,279
+		background color "Silver"
+		label '$(v_calend_tabla_days[14])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[14]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 12
+		disabled if (v_calend_fiesta = true) or (v_calend_tabla_days_status[14] = false)
+	}
+	push button {
+		size 30,27 at 326,306
+		background color "Silver"
+		label '$(v_calend_tabla_days[20])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[20]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 13
+		disabled if (v_calend_fiesta = true) or (v_calend_tabla_days_status[20] = false)
+	}
+	push button {
+		size 30,27 at 356,306
+		background color "Silver"
+		label '$(v_calend_tabla_days[21])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[21]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 13
+		disabled if (v_calend_fiesta = true) or (v_calend_tabla_days_status[21] = false)
+	}
+	push button {
+		size 30,27 at 326,334
+		background color "Silver"
+		label '$(v_calend_tabla_days[27])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[27]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 14
+		disabled if (v_calend_fiesta = true) or (v_calend_tabla_days_status[27] = false)
+	}
+	push button {
+		size 30,27 at 356,334
+		background color "Silver"
+		label '$(v_calend_tabla_days[28])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[28]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 14
+		disabled if (v_calend_fiesta = true) or (v_calend_tabla_days_status[28] = false)
+	}
+	push button {
+		size 30,27 at 326,361
+		background color "Silver"
+		label '$(v_calend_tabla_days[34])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[34]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 15
+		disabled if (v_calend_fiesta = true) or (v_calend_tabla_days_status[34] = false)
+	}
+	push button {
+		size 30,27 at 356,361
+		background color "Silver"
+		label '$(v_calend_tabla_days[35])' {
+			font {
+				name "Arial"
+				size 10
+				bold
+			}
+		}
+		on click commit {
+			v_calend_day_test := v_calend_tabla_days[35]
+			call selecc_fecha(v_calend_day_test)
+		}
+		tab order 15
+		disabled if (v_calend_fiesta = true) or (v_calend_tabla_days_status[35] = false)
+	}
+	static box {
+		size 66,192 at 323,225
+		background color rgb 221,221,221
+		label '' {}
+	}
+	static text {
+		size 28,22 at 325,229
+		background transparent
+		label ' Sa' {
+			font {
+				name "Arial Narrow"
+				size 12
+				bold
+				underline
+				color "Maroon"
+			}
+			center
+		}
+	}
+	static text {
+		size 28,22 at 356,229
+		background transparent
+		label 'Su' {
+			font {
+				name "Arial Narrow"
+				size 12
+				bold
+				underline
+				color "Maroon"
+			}
+			center
+		}
+	}
+	static box {
+		size 231,32 at 162,153
+		background color "White"
+		label '' {}
+		border etched
+	}
+	static box {
+		size 231,43 at 162,424
+		background color "White"
+		label '' {}
+		border etched
+	}
+	static text {
+		size 57,22 at 167,427
+		background transparent
+		label b_from {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static text {
+		size 153,15 at 230,427
+		background transparent
+		label v_calend_text_from {
+			font {
+				name "Arial"
+				size 8
+				bold
+			}
+			center
+		}
+	}
+	static text {
+		size 153,15 at 230,445
+		background transparent
+		label v_calend_text_to {
+			font {
+				name "Arial"
+				size 8
+				bold
+			}
+			center
+		}
+	}
+	static text {
+		size 51,18 at 173,445
+		background transparent
+		label b_to {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+			align right
+		}
+	}
+	static box {
+		size 231,32 at 162,187
+		background color rgb 221,221,221
+		label '' {}
+		border etched
+	}
+	combo box "cboMOS" for v_month_cto {
+		size 131,209 at 165,190
+		background color rgb 140,198,255
+		font {
+			name "Arial"
+			size 10
+			bold
+			color rgb 48,48,48
+		}
+		on list selection commit {
+			if v_month_cto = '' then {
+				v_month_cto := month(today())
+			}
+			else {}
+			if GetMonthNum(v_month_cto) <= month(now()) and v_year_cto <= year(now()) then {
+				v_month_cto := GetMonthName(month(now()))
+			}
+			else {}
+			v_calend_month := GetMonthNum(v_month_cto)
+			v_calend_year := v_year_cto
+			if v_calend_month = month(today()) and v_calend_year = year(today()) then {
+				v_calend_day := day(today())
+			}
+			else {
+				v_calend_day := 1
+			}
+			case week_day(date(v_calend_year, v_calend_month, v_calend_day)) {
+				when 'sabado' do {
+					v_calend_day := 3
+				}
+				when 'domingo' do {
+					v_calend_day := 2
+				}
+				default {}
+			}
+			call cambiar_mes(v_calend_month, v_calend_day, v_calend_year)
+			v_date_cto := date(v_calend_year, v_calend_month, v_calend_day)
+		}
+		on lose focus {}
+		items "January" label "", "February" label "", "March" label "", "April" label "", "May" label "", "June" label "", "July" label "", "August" label "", "September" label "", "October" label "", "November" label "", "December" label ""
+		drop on demand
+	}
+	combo box "cboYR" for v_year_cto {
+		size 88,175 at 300,190
+		background color rgb 140,198,255
+		font {
+			name "Arial"
+			size 10
+			bold
+			color rgb 48,48,48
+		}
+		on list selection commit {
+			if v_year_cto = '' then {
+				v_year_cto := year(today())
+			}
+			else {}
+			if v_year_cto <= year(now()) then {
+				if GetMonthNum(v_month_cto) < month(now()) then {
+					v_month_cto := GetMonthName(month(now()))
+				}
+				else {}
+			}
+			else {}
+			v_calend_month := GetMonthNum(v_month_cto)
+			v_calend_year := v_year_cto
+			if GetMonthNum(v_month_cto) = month(now()) and v_year_cto = year(now()) then {
+				v_calend_day := day(today())
+			}
+			else {
+				v_calend_day := 1
+			}
+			case week_day(date(v_calend_year, v_calend_month, v_calend_day)) {
+				when 'sabado' do {
+					v_calend_day := 3
+				}
+				when 'domingo' do {
+					v_calend_day := 2
+				}
+				default {}
+			}
+			call cambiar_mes(v_calend_month, v_calend_day, v_calend_year)
+			v_date_cto := date(v_calend_year, v_calend_month, v_calend_day)
+		}
+		on lose focus {}
+		cursor cur_startYR
+		drop on demand
+	}
+	static text {
+		size 141,22 at 206,161
+		background transparent
+		label '$(v_month_cto) $(v_year_cto)' {
+			font {
+				size 10
+				bold
+				color rgb 48,48,48
+			}
+			center
+		}
+	}
+	on first enter {
+		v_calend_month := month(v_calend_date_from)
+		v_calend_day := day(v_calend_date_from)
+		v_calend_year := year(v_calend_date_from)
+		v_calend_date_cto := v_calend_date_from
+		v_calend_hour_cto := now() : time
+		v_calend_fiesta := true
+		v_date_cto := date(v_calend_year, v_calend_month, v_calend_day)
+		v_hour_cto := now() : time
+		call cambiar_mes(v_calend_month, v_calend_day, v_calend_year)
+		call cambiar_nombre_dia(v_calend_month, v_calend_day, v_calend_year)
+	}
+	on enter {
+		v_priority := 5
+		v_date := now() : date
+		v_hour := now() : time
+		v_telephone_cto := ''
+		v_telephone_number := ''
+		v_telephone_cto := 'Same'
+		v_telephone_number := text_extract(@phone_info.phone, text_length(campaign.cp_prefix) + 1, text_length(@phone_info.phone))
+		v_month_cto := GetMonthName(month(now()))
+		v_year_cto := '$(year(now()))'
+		open cursor cur_startYR
+	}
+	on exit {
+		close cursor cur_startYR
+	}
+}
+
+node "EMAIL_REPLY" {
+	id 74
+	master "EMAIL_MASTER"
+	variables {}
+	cursors {}
+	push button {
+		size 110,30 at 750,590
+		label 'Send mail' {
+			font {
+				name "Palatino Linotype"
+				size 10
+				bold
+
+			}
+		}
+		on click commit {
+			clear error
+			email editor 'E_mail_rep' send
+			if @error_info.code = 0 then {
+				close window
+			}
+			else {}
+		}
+		tooltip 'Send Mail'
+	}
+	email editor "E_mail_rep" {
+		size 855,560 at 25,15
+		open new emails in same editor
+		labels font {
+			name "Arial"
+			size 10
+
+		}
+		inputs font {
+			name "Arial"
+			size 10
+
+		}
+	}
+	push button {
+		size 110,30 at 635,590
+		label 'Close' {
+			font {
+				name "Arial"
+				size 10
+				bold
+
+			}
+		}
+		on click commit {
+			close window
+		}
+		tooltip ''
+	}
+	on first enter {}
+	on enter {}
+	on exit {}
+}
+
+node "EMAIL_MASTER" {
+	id 75
+
+	variables {}
+	cursors {}
+	on first enter {}
+	on enter {}
+	on exit {}
+}
+
+node "EMAIL_FORWARD" {
+	id 76
+	master "EMAIL_MASTER"
+	variables {}
+	cursors {}
+	push button {
+		size 110,30 at 750,590
+		label 'Send mail' {
+			font {
+				name "Palatino Linotype"
+				size 10
+				bold
+
+			}
+		}
+		on click commit {
+			clear error
+			email editor 'E_mail_for' send
+			if @error_info.code = 0 then {
+				close window
+			}
+			else {}
+		}
+		tooltip 'Send Mail'
+	}
+	push button {
+		size 110,30 at 635,590
+		label 'Close' {
+			font {
+				name "Arial"
+				size 10
+				bold
+
+			}
+		}
+		on click commit {
+			close window
+		}
+		tooltip ''
+	}
+	email editor "E_mail_for" {
+		size 835,560 at 45,20
+		open new emails in same editor
+		labels font {
+			name "Arial"
+			size 10
+
+		}
+		inputs font {
+			name "Arial"
+			size 10
+
+		}
+	}
+	on first enter {}
+	on enter {}
+	on exit {}
+}
+
+node "EMAIL_RECIEVE" {
+	id 77
+
+	variables {}
+	cursors {}
+	email editor "E_mail" {
+		size 775,435 at 130,40
+		initial email id contact_profile.email1
+		open new emails in same editor
+		labels font {
+			name "Arial"
+			size 10
+
+		}
+		inputs font {
+			name "Arial"
+			size 10
+
+		}
+	}
+	push button {
+		size 110,40 at 10,380
+		label 'Reply' {
+			font {
+				name "Arial"
+				size 10
+				bold
+
+			}
+		}
+		on click commit {
+			var send_window_ID: number
+			open window 'EMAIL_REPLY' caption '' id into send_window_ID
+			email editor 'E_mail' reply into email editor 'E_mail_rep' in window send_window_ID
+			email editor 'E_mail_rep' in window send_window_ID set from field to email_message(@email_info.emailId).to
+		}
+		tooltip ''
+	}
+	push button {
+		size 110,40 at 10,112
+		label 'Forward' {
+			font {
+				name "Arial"
+				size 10
+				bold
+
+			}
+		}
+		on click commit {
+			var send_window_ID: number
+			open window 'EMAIL_FORWARD' caption '' id into send_window_ID
+			email editor 'E_mail' forward into email editor 'E_mail_for' in window send_window_ID
+			email editor 'E_mail_for' in window send_window_ID set to field to campaign.cp_email_address1
+			email editor 'E_mail_for' in window send_window_ID set cc field to campaign.cp_email_address2
+			email editor 'E_mail_for' in window send_window_ID set from field to email_message(@email_info.emailId).to
+		}
+	}
+	push button {
+		size 110,40 at 10,240
+		label 'Reply to all' {
+			font {
+				name "Arial"
+				size 10
+				bold
+
+			}
+		}
+		on click commit {
+			var send_window_ID: number
+			open window 'EMAIL_REPLY' caption '' id into send_window_ID
+			email editor 'E_mail' reply all into email editor 'E_mail_rep' in window send_window_ID
+			email editor 'E_mail_rep' in window send_window_ID set from field to email_message(@email_info.emailId).to
+		}
+	}
+	static box {
+		size 120,434 at 5,40
+		background color "Window Background"
+		label "" {
+			font {
+				color "White"
+			}
+		}
+		border sunken
+	}
+	static box {
+		size 920,50 at 5,580
+		label "" {}
+		border sunken
+	}
+	push button {
+		size 180,30 at 545,590
+		label b_no_sale {
+			font {
+				name "Arial"
+				size 10
+				bold
+
+			}
+		}
+		on click commit {
+			v_min_outcome := campaign.cp_no_sale_min
+			v_max_outcome := campaign.cp_no_sale_max
+			v_sale := false
+			goto node 'SetCallType'
+		}
+		disabled if (campaign.cp_no_sale_min = '') or (campaign.cp_no_sale_max = '')
+	}
+	push button {
+		size 180,30 at 735,590
+		label b_sale {
+			font {
+				name "Arial"
+				size 10
+				bold
+
+			}
+		}
+		on click commit {
+			v_min_outcome := campaign.cp_sale_min
+			v_max_outcome := campaign.cp_sale_max
+			v_sale := true
+			goto node 'SetCallType'
+		}
+		disabled if (campaign.cp_sale_min = '') or (campaign.cp_sale_max = '')
+	}
+	input for contact.ct_comments {
+		size 885,70 at 20,510
+		font {
+			name "Arial"
+			size 10
+			bold
+
+		}
+		on lose focus commit {}
+		multiline
+	}
+	static text {
+		size 135,15 at 20,495
+		label '$(b_comments)' {
+			font {
+				name "Arial"
+				size 8
+				bold
+				color rgb 15,137,210
+			}
+		}
+	}
+	on first enter {}
+	on enter {
+		if campaign.cp_language = 'es' or campaign.cp_language = 'ES' then {
+			b_redial := 'Reconectar'
+			b_record_call := 'Grabar llamada'
+			b_search_contact := 'Búsqueda contacto'
+			b_back := 'Atrás'
+			b_set_callback := 'Programar rellamada'
+			b_callback := 'Rellamada'
+			b_no_contact := 'Sin respuesta'
+			b_data_input := 'Entrada datos'
+			b_sale := 'Venta'
+			b_no_sale := 'Rechazo'
+			b_more_data := 'Más datos'
+			b_end := 'Finalizar'
+			b_clear := 'Borrar'
+			b_search := 'Buscar'
+			b_close := 'Cerrar'
+			b_refuse := 'Rechazar'
+			b_load := 'Cargar'
+			b_phone := 'Teléfono'
+			b_priority := 'Prioridad'
+			b_low := 'Baja'
+			b_med := 'Media'
+			b_high := 'Alta'
+			b_from := 'Desde'
+			b_to := 'Hasta'
+			b_day := 'Dia'
+			b_time := 'Hora'
+			b_afternoon := 'Mediodia (3pm)'
+			b_evening := 'Tarde (6pm)'
+			b_night := 'Noche (21pm)'
+			b_myself := 'Rellamada a mi mismo'
+			b_other := 'Otro'
+			b_transfer_ag := 'Transferir a agente'
+			b_transfer := 'Transferir llamada'
+			b_am := 'Contestador'
+			b_welcome := 'Buenos dias. Soy $(@login_info.fullName) de $(campaign.cp_company). ¿Podria hablar con $(contact.ct_name) $(contact.ct_surname), por favor? '
+			b_outcome := 'Selecciona un outcome (código de cierre)'
+			b_search_customer := 'Introduce el nombre, apellido, direccion y/o teléfono del contacto a buscar'
+			b_select_customer := 'Selecciona un contacto'
+			b_desired_customer := '¿Es este el contacto que se desea cargar?'
+			b_comments := 'Comentarios'
+		}
+		else {
+			if campaign.cp_language = 'fr' or campaign.cp_language = 'FR' then {
+				b_redial := 'Marquage Automatique'
+				b_record_call := 'Enregistrer Conversation'
+				b_search_contact := 'Chercher Fiche Client'
+				b_back := 'Retour'
+				b_set_callback := 'Fixer Rappel'
+				b_callback := 'Rappel'
+				b_no_contact := 'Injoinable'
+				b_data_input := 'Entrée Données'
+				b_sale := 'Vente'
+				b_no_sale := 'Refus'
+				b_more_data := '+ de Données'
+				b_end := 'Fin'
+				b_clear := 'Effacer'
+				b_search := 'Chercher'
+				b_close := 'Fermer'
+				b_refuse := 'Refus'
+				b_load := 'Charger fiches client'
+				b_phone := 'Téléphone'
+				b_priority := 'Priorité'
+				b_low := 'Bas'
+				b_med := 'Moyen'
+				b_high := 'Haut'
+				b_from := 'De'
+				b_to := 'À'
+				b_day := 'Jour'
+				b_time := 'Heure'
+				b_afternoon := 'Après-midi (3pm)'
+				b_evening := 'Fin d\'Après-midi (6pm)'
+				b_night := 'Soir (21pm)'
+				b_myself := 'Moi-même'
+				b_other := 'Autre'
+				b_transfer_ag := 'Transfer vers un agent'
+				b_transfer := 'Transfer appel'
+				b_am := 'Répondeur'
+				b_welcome := 'Bonjours/Bonsoir je se suis monsieur/madame $(@login_info.fullName) de la société $(campaign.cp_company) puis-je parler a Monsieur/madame $(contact.ct_name) $(contact.ct_surname) s’il vous plaît?'
+				b_outcome := 'Veuillez insérer un résultat'
+				b_search_customer := 'Veuillez insérer le nom, prénom, adresse ou numéro de téléphone du client'
+				b_select_customer := 'Sélectionnez un client'
+				b_desired_customer := 'Est-ce le client recherché?'
+				b_comments := 'Commentaires'
+			}
+			else {
+				if campaign.cp_language = 'it' or campaign.cp_language = 'IT' then {
+					b_redial := 'Richiama'
+					b_record_call := 'Registra chiamata'
+					b_search_contact := 'Cerca anagrafica'
+					b_back := 'Indietro'
+					b_set_callback := 'Imposta callback'
+					b_callback := 'Callback'
+					b_no_contact := 'Non risponde'
+					b_data_input := 'Inserisci dati'
+					b_sale := 'Vendita'
+					b_no_sale := 'Rifiuto'
+					b_more_data := 'Dati aggiuntivi'
+					b_end := 'Fine'
+					b_clear := 'Cancella campi'
+					b_search := 'Ricerca'
+					b_close := 'Chiudi'
+					b_refuse := 'Non caricare'
+					b_load := 'Carica'
+					b_phone := 'Telefono'
+					b_priority := 'Priorità'
+					b_low := 'Bassa'
+					b_med := 'Media'
+					b_high := 'Alta'
+					b_from := 'Da'
+					b_to := 'A'
+					b_day := 'Data'
+					b_time := 'Ora'
+					b_afternoon := 'Pomeriggio (3pm)'
+					b_evening := 'Sera (6pm)'
+					b_night := 'Notte (21pm)'
+					b_myself := 'Reimposta per me'
+					b_other := 'Altro'
+					b_transfer_ag := 'Trasferisci ad agente'
+					b_transfer := 'Trasferisci chiamata'
+					b_am := 'Segreteria'
+					b_welcome := 'Salve. Sono $(@login_info.fullName) de $(campaign.cp_company). Potrei parlare con $(contact.ct_name) $(contact.ct_surname), per favore?'
+					b_outcome := 'Per favore seleziona un esito chiamata'
+					b_search_customer := 'Per favore inserisci nome, cognome, indirizzo e telefono del contatto'
+					b_select_customer := 'Seleziona un contatto'
+					b_desired_customer := 'E questo il cliente desiderato?'
+					b_comments := 'Commenti'
+				}
+				else {
+					if campaign.cp_language = 'en' or campaign.cp_language = 'EN' then {
+						b_redial := 'Redial'
+						b_record_call := 'Record call'
+						b_search_contact := 'Search contact'
+						b_back := 'Back'
+						b_set_callback := 'Set callback'
+						b_callback := 'Callback'
+						b_no_contact := 'No answer'
+						b_data_input := 'Data input'
+						b_sale := 'Sale'
+						b_no_sale := 'Refusal'
+						b_more_data := 'More data'
+						b_end := 'Finish'
+						b_clear := 'Clear'
+						b_search := 'Search'
+						b_close := 'Close'
+						b_refuse := 'Refuse'
+						b_load := 'Load'
+						b_phone := 'Telephone'
+						b_priority := 'Priority'
+						b_low := 'Low'
+						b_med := 'Medium'
+						b_high := 'High'
+						b_from := 'From'
+						b_to := 'To'
+						b_day := 'Date'
+						b_time := 'Time'
+						b_afternoon := 'Afternoon (3pm)'
+						b_evening := 'Evening (6pm)'
+						b_night := 'Night (21pm)'
+						b_myself := 'Reschedule to myself'
+						b_other := 'Other'
+						b_transfer_ag := 'Transfer to agent'
+						b_transfer := 'Transfer call'
+						b_am := 'Answering Machine'
+						b_welcome := 'Good morning/afternoon/evening. This is $(@login_info.fullName) from $(campaign.cp_company). Could I speak with $(contact.ct_name) $(contact.ct_surname), please?'
+						b_outcome := 'Please select an outcome'
+						b_search_customer := 'Please enter the contact name, surname, address or phone'
+						b_select_customer := 'Select a contact'
+						b_desired_customer := 'Is this the desired contact?'
+						b_comments := 'Comments'
+					}
+					else {
+						if campaign.cp_language = 'de' or campaign.cp_language = 'DE' then {
+							b_redial := 'Wiederwahl'
+							b_record_call := 'Anrufaufnahme'
+							b_search_contact := 'Kontakt suchen'
+							b_back := 'Zurück'
+							b_set_callback := 'Rückruf vereinbaren'
+							b_callback := 'Rückruf'
+							b_no_contact := 'Kein Kontakt'
+							b_data_input := 'Dateneingabe'
+							b_sale := 'Verkauf'
+							b_no_sale := 'Kein Verkauf'
+							b_more_data := 'Zusätzliche Daten'
+							b_end := 'Abgeschlossen'
+							b_clear := 'Löschen'
+							b_search := 'Suchen'
+							b_close := 'Abschließen'
+							b_refuse := 'Ablehnen'
+							b_load := 'Laden'
+							b_phone := 'Telefonnummer'
+							b_priority := 'Wichtigkeit'
+							b_low := 'Nieder'
+							b_med := 'Mittel'
+							b_high := 'Hoch'
+							b_from := 'Von'
+							b_to := 'Zu'
+							b_day := 'Datum'
+							b_time := 'Zeit'
+							b_afternoon := 'Nachmittag (15:00)'
+							b_evening := 'Abends (18:00)'
+							b_night := 'Nacht (21:00)'
+							b_myself := 'Rückruf für mich im Kalender eintragen'
+							b_other := 'Andere'
+							b_transfer_ag := 'Weiterleitung zum Agent'
+							b_transfer := 'Anrufweiterleitung'
+							b_am := 'Anrufbeantworter'
+							b_welcome := 'Guten Morgen / Tag / Abend. Hier spricht $(@login_info.fullName) von $(campaign.cp_company). Kann ich bitte mit $(contact.ct_name) $(contact.ct_surname) sprechen?'
+							b_outcome := 'Dispo eingeben'
+							b_search_customer := 'Tragen Sie bitte Ihnen Vorname, Familienname, Adresse oder Telefonnummer'
+							b_select_customer := 'Kunden auswählen'
+							b_desired_customer := 'Ist das der gewünschte Kunde?'
+							b_comments := 'Komentar'
+						}
+						else {
+							if campaign.cp_language = 'lt' or campaign.cp_language = 'LT' then {
+								b_redial := 'Perskambinti'
+								b_record_call := 'Irašyti skambuti'
+								b_search_contact := 'Ieškoti kontakto'
+								b_back := 'Atgal'
+								b_set_callback := 'Nustatyti perskambinima'
+								b_callback := 'Perskambinimas'
+								b_no_contact := 'Neatsiliepia'
+								b_data_input := 'Duomenu ivedimas'
+								b_sale := 'Pardavimas'
+								b_no_sale := 'Atsisake'
+								b_more_data := 'Daugiau duomenu'
+								b_end := 'Pabaiga'
+								b_clear := 'Ištrinti'
+								b_search := 'Ieškoti'
+								b_close := 'Uždaryti'
+								b_refuse := 'Atsisakyti'
+								b_load := 'Užkrauti'
+								b_phone := 'Telefonas'
+								b_priority := 'Prioritetas'
+								b_low := 'Žemas'
+								b_med := 'Vidutinis'
+								b_high := 'Aukštas'
+								b_from := 'Nuo'
+								b_to := 'Kam'
+								b_day := 'Data'
+								b_time := 'Laikas'
+								b_afternoon := 'Popiete (nuo 15val)'
+								b_evening := 'Vakaras (nuo 18val)'
+								b_night := 'Velus vakaras (po 21val)'
+								b_myself := 'Priskirti man'
+								b_other := 'Kita'
+								b_transfer_ag := 'Persiusti agentui'
+								b_transfer := 'Perjungti skambuti'
+								b_am := 'Autoatsakiklis'
+								b_welcome := 'Labas rytas/diena/vakaras. Mano vardas $(@login_info.fullName) skambinu $(campaign.cp_company) vardu. Ar galeciau kalbeti su $(contact.ct_name) $(contact.ct_surname)?'
+								b_outcome := 'Pasirinkite pabaigos koda'
+								b_search_customer := 'Iveskite kliento varda, pavarde, adresa ar telefona'
+								b_select_customer := 'Pasirinkite klienta'
+								b_desired_customer := 'Ar pasirinktas teisingas klientas?'
+								b_comments := 'Komentarai'
+							}
+							else {
+								if campaign.cp_language = 'nl' or campaign.cp_language = 'NL' then {
+									b_redial := 'Terug opbellen'
+									b_record_call := 'Oproep opnemen'
+									b_search_contact := 'Kontakt opzoeken'
+									b_back := 'Terug'
+									b_set_callback := 'Callback plaatsen'
+									b_callback := 'Callback'
+									b_no_contact := 'Geen antwoord'
+									b_data_input := 'Gegevens introduceren'
+									b_sale := 'Verkoop'
+									b_no_sale := 'Weigering'
+									b_more_data := 'Meer gegevens'
+									b_end := 'Beëindigen'
+									b_clear := 'Uitwissen'
+									b_search := 'Zoeken'
+									b_close := 'Sluiten'
+									b_refuse := 'Weigeren'
+									b_load := 'Opladen'
+									b_phone := 'Telefoon'
+									b_priority := 'Prioriteit'
+									b_low := 'Laag'
+									b_med := 'Medium'
+									b_high := 'Hoog'
+									b_from := 'Van'
+									b_to := 'Naar'
+									b_day := 'Datum'
+									b_time := 'Tijdstip'
+									b_afternoon := 'Namiddag (3pm)'
+									b_evening := 'Avond (6pm)'
+									b_night := 'Nacht (9pm)'
+									b_myself := 'Aan mijzelf herprogrameren'
+									b_other := 'Andere'
+									b_transfer_ag := 'Naar een agent doorsturen'
+									b_transfer := 'Oproep doorsturen'
+									b_am := 'Antwoordapparaat'
+									b_welcome := 'Goede morgen/namiddag/avond. U spreekt met $(@login_info.fullName) van $(campaign.cp_company). Zou ik met $(contact.ct_name) $(contact.ct_surname) mogen spreken, AUB ?'
+									b_outcome := 'Kies een resultaat, AUB.'
+									b_search_customer := 'Introduceer de naam, voornaam, adres of telefoon nummer van de kontakt, AUB.'
+									b_select_customer := 'Kies een kontakt'
+									b_desired_customer := 'Is dit de gewenste kontakt?'
+									b_comments := 'Opmerkingen'
+								}
+								else {
+									if campaign.cp_language = 'sv' or campaign.cp_language = 'SV' then {
+										b_redial := 'Återuppring'
+										b_record_call := 'Spela in samtal'
+										b_search_contact := 'Sök kontakt'
+										b_back := 'Tillbaks'
+										b_set_callback := 'Ring senare'
+										b_callback := 'Ring senare'
+										b_no_contact := 'Bortfall'
+										b_data_input := 'Kund Info'
+										b_sale := 'Sälj'
+										b_no_sale := 'Vägrar'
+										b_more_data := 'Mer info'
+										b_end := 'Avsluta'
+										b_clear := 'Rensa'
+										b_search := 'Sök'
+										b_close := 'Stäng'
+										b_refuse := 'Vägra'
+										b_load := 'Ladda'
+										b_phone := 'Telefon'
+										b_priority := 'Prioritet'
+										b_low := 'Låg'
+										b_med := 'Mellan'
+										b_high := 'Hög'
+										b_from := 'Från'
+										b_to := 'Till'
+										b_day := 'Datum'
+										b_time := 'Tid'
+										b_afternoon := 'Eftermiddag (15:00)'
+										b_evening := 'Kväll (18:00)'
+										b_night := 'Natt (21:00)'
+										b_myself := 'Omdirigera till mig själv'
+										b_other := 'Annat'
+										b_transfer_ag := 'Omdirigera till agent'
+										b_transfer := 'Omdirigera samtal'
+										b_am := 'Telefonsvarare'
+										b_welcome := 'God morgon/eftermiddag/kväll. Detta är $(@login_info.fullName) från $(campaign.cp_company). Skulle jag kunna få tala med $(contact.ct_name) $(contact.ct_surname)?'
+										b_outcome := 'Var god välj en av alternativen'
+										b_search_customer := 'Var god ange kontakt namn, efternamn, adress eller telefonnummer'
+										b_select_customer := 'Välj en kontakt'
+										b_desired_customer := 'Är detta den önskade kontakten?'
+										b_comments := 'Kommentarer'
+									}
+									else {
+										if campaign.cp_language = 'da' or campaign.cp_language = 'DA' then {
+											b_redial := 'Redial'
+											b_record_call := 'Record call'
+											b_search_contact := 'Search contact'
+											b_back := 'Back'
+											b_set_callback := 'Set callback'
+											b_callback := 'Callback'
+											b_no_contact := 'No answer'
+											b_data_input := 'Data input'
+											b_sale := 'Sale'
+											b_no_sale := 'Refusal'
+											b_more_data := 'More data'
+											b_end := 'Finish'
+											b_clear := 'Clear'
+											b_search := 'Search'
+											b_close := 'Close'
+											b_refuse := 'Refuse'
+											b_load := 'Load'
+											b_phone := 'Telephone'
+											b_priority := 'Priority'
+											b_low := 'Low'
+											b_med := 'Medium'
+											b_high := 'High'
+											b_from := 'From'
+											b_to := 'To'
+											b_day := 'Date'
+											b_time := 'Time'
+											b_afternoon := 'Afternoon (3pm)'
+											b_evening := 'Evening (6pm)'
+											b_night := 'Night (21pm)'
+											b_myself := 'Reschedule to myself'
+											b_other := 'Other'
+											b_transfer_ag := 'Transfer to agent'
+											b_transfer := 'Transfer call'
+											b_am := 'Answering Machine'
+											b_welcome := 'Goddag. Jeg hedder $(@login_info.fullName) og jeg ringer fra $(campaign.cp_company). Må jeg tale med $(contact.ct_name) $(contact.ct_surname)?'
+											b_outcome := 'Please select an outcome'
+											b_search_customer := 'Please enter the contact name, surname, address or phone'
+											b_select_customer := 'Select a contact'
+											b_desired_customer := 'Is this the desired contact?'
+											b_comments := 'Comments'
+										}
+										else {
+											if campaign.cp_language = 'no' or campaign.cp_language = 'NO' then {
+												b_redial := 'Ring om igjen'
+												b_record_call := 'Register samtale'
+												b_search_contact := 'Søk kontakt'
+												b_back := 'Tilbake'
+												b_set_callback := 'Sett gjenoppkall'
+												b_callback := 'Ring tilbake'
+												b_no_contact := 'Ikke svar'
+												b_data_input := 'Data tilførsel'
+												b_sale := 'Salg'
+												b_no_sale := 'Avslag'
+												b_more_data := 'Mer data'
+												b_end := 'Ferdig'
+												b_clear := 'Klar'
+												b_search := 'Søk'
+												b_close := 'Lukk'
+												b_refuse := 'Avvise'
+												b_load := 'Lade'
+												b_phone := 'Telefon'
+												b_priority := 'Prioritet'
+												b_low := 'Lav'
+												b_med := 'Middels'
+												b_high := 'Høy'
+												b_from := 'Fra'
+												b_to := 'Til'
+												b_day := 'Dato'
+												b_time := 'Tid'
+												b_afternoon := 'Ettermiddag (kl. 15.00)'
+												b_evening := 'Aften (kl. 18.00)'
+												b_night := 'Kveld (kl.21.00)'
+												b_myself := 'Omplanlegg til meg selv'
+												b_other := 'Andre'
+												b_transfer_ag := 'Overfør til kundebehandler'
+												b_transfer := 'Overfør samtale'
+												b_am := 'Telefonsvarer'
+												b_welcome := 'God morgen/dag/aften. Dette er $(@login_info.fullName) fra $(campaign.cp_company). Kan jeg vennligst få snakke med $(contact.ct_name) $(contact.ct_surname)?'
+												b_outcome := 'Vennligst velg et resultat'
+												b_search_customer := 'Vennligst skriv kontakt navn, etternavn, adresse eller telefonnummer'
+												b_select_customer := 'Velg en kontakt'
+												b_desired_customer := 'Er det denne kontakten du ønsker?'
+												b_comments := 'Kommentarer'
+											}
+											else {
+												if campaign.cp_language = 'hu' or campaign.cp_language = 'HU' then {
+													b_redial := 'Újrahívás'
+													b_record_call := 'Felvétel'
+													b_search_contact := 'Ügyfél keresés'
+													b_back := 'Vissza'
+													b_set_callback := 'Visszahívás beállítás'
+													b_callback := 'Visszahívás'
+													b_no_contact := 'Nincs válasz'
+													b_data_input := 'Adatbevitel'
+													b_sale := 'Sikeres'
+													b_no_sale := 'Visszautasít'
+													b_more_data := 'További adatok'
+													b_end := 'Befejezés'
+													b_clear := 'Töröl'
+													b_search := 'Keres'
+													b_close := 'Bezár'
+													b_refuse := 'Sikertelen'
+													b_load := 'Betölt'
+													b_phone := 'Telefonszám'
+													b_priority := 'Prioritás'
+													b_low := 'Alacsony'
+													b_med := 'Közepes'
+													b_high := 'Magas'
+													b_from := 'Kezdés:'
+													b_to := 'Zárás:'
+													b_day := 'Dátum'
+													b_time := 'Idö'
+													b_afternoon := 'Délután (3 óra)'
+													b_evening := 'Délután (6 óra)'
+													b_night := 'Este (9 óra)'
+													b_myself := 'Újraütemez'
+													b_other := 'Egyéb'
+													b_transfer_ag := 'Ügynökhöz átirányítás'
+													b_transfer := 'Hívás átirányítás'
+													b_am := 'Üzenetrögzítö'
+													b_welcome := 'Jó reggelt / napot / estét kívánok!\r\n'
+														'$(@login_info.fullName) vagyok a $(campaign.cp_company) megbízásából.\r\n'
+														'$(contact.ct_surname) $(contact.ct_name)-val/vel szeretnék beszélni.'
+													b_outcome := 'Kérem, válassza ki a hívás kimenetelét'
+													b_search_customer := 'Kérem adja meg az ügyfél nevét, címét vagy telefonszámát'
+													b_select_customer := 'Válasszon ügyfelet'
+													b_desired_customer := 'Ez a keresett ügyfél?'
+													b_comments := 'Megjegyzés'
+												}
+												else {
+													if campaign.cp_language = 'et' or campaign.cp_language = 'ET' then {
+														b_redial := 'Uuesti valimine'
+														b_record_call := 'Salvesta kõne'
+														b_search_contact := 'Otsi kontakti'
+														b_back := 'Tagasi'
+														b_set_callback := 'Fikseeri tagasi helistamine'
+														b_callback := 'Tagasi helistamine'
+														b_no_contact := 'Ei vasta'
+														b_data_input := 'Info sisestamine'
+														b_sale := 'Müük'
+														b_no_sale := 'Eitav vastus'
+														b_more_data := 'Lisa info'
+														b_end := 'Lõpp'
+														b_clear := 'Puhasta'
+														b_search := 'Osti'
+														b_close := 'Sulge'
+														b_refuse := 'Ei soovi'
+														b_load := 'Lae'
+														b_phone := 'Telefon'
+														b_priority := 'Prioriteet'
+														b_low := 'Madal'
+														b_med := 'Keskmine'
+														b_high := 'Kõrge'
+														b_from := 'Kellelt'
+														b_to := 'Kellele'
+														b_day := 'Kuupäev'
+														b_time := 'Aeg'
+														b_afternoon := 'Peale lõunat (15.00)'
+														b_evening := 'Õhtul (18.00)'
+														b_night := 'Öösel (21.00)'
+														b_myself := 'Määra tagasihelistamine minule'
+														b_other := 'Muu'
+														b_transfer_ag := 'Suuna agendile'
+														b_transfer := 'Suuna kõne'
+														b_am := 'Automaatvastaja'
+														b_welcome := 'Tere hommikust/ päevast/ õhtust. Minu nimi on $(@login_info.fullName) ja ma helistan teile $(campaign.cp_company). Kas ma saan palun rääkida $(contact.ct_name) $(contact.ct_surname)?'
+														b_outcome := 'Vali tulem'
+														b_search_customer := 'Palun sisesta kontakti ees- ja perekonnanimi, aadrss või telefon'
+														b_select_customer := 'Vali kontakt'
+														b_desired_customer := 'Kas see on soovitud kontakt?'
+														b_comments := 'Kommentaarid'
+													}
+													else {
+														message 'Language unknown: using EN. \r\n'
+															'Set cp_language to ES, FR, IT, EN, DE, LT, NL, SV, DA, NO, ET or HU.'
+														b_redial := 'Redial'
+														b_record_call := 'Record call'
+														b_search_contact := 'Search contact'
+														b_back := 'Back'
+														b_set_callback := 'Set callback'
+														b_callback := 'Callback'
+														b_no_contact := 'No answer'
+														b_data_input := 'Data input'
+														b_sale := 'Sale'
+														b_no_sale := 'Refusal'
+														b_more_data := 'More data'
+														b_end := 'Finish'
+														b_clear := 'Clear'
+														b_search := 'Search'
+														b_close := 'Close'
+														b_refuse := 'Refuse'
+														b_load := 'Load'
+														b_phone := 'Telephone'
+														b_priority := 'Priority'
+														b_low := 'Low'
+														b_med := 'Medium'
+														b_high := 'High'
+														b_from := 'From'
+														b_to := 'To'
+														b_day := 'Date'
+														b_time := 'Time'
+														b_afternoon := 'Afternoon (3pm)'
+														b_evening := 'Evening (6pm)'
+														b_night := 'Night (21pm)'
+														b_myself := 'Reschedule to myself'
+														b_other := 'Other'
+														b_transfer_ag := 'Transfer to agent'
+														b_transfer := 'Transfer call'
+														b_am := 'Answering Machine'
+														b_welcome := 'Good morning/afternoon/evening. This is $(@login_info.fullName) from $(campaign.cp_company). Could I speak with $(contact.ct_name) $(contact.ct_surname), please?'
+														b_outcome := 'Please select an outcome'
+														b_search_customer := 'Please enter the contact name, surname, address or phone'
+														b_select_customer := 'Select a contact'
+														b_desired_customer := 'Is this the desired contact?'
+														b_comments := 'Comments'
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	on exit {}
+}
+<?xml version="1.0" encoding="UTF-8"?>
+<asl_meta_data xml_spec_version="8.1">
+  <debug_info />
+</asl_meta_data>
